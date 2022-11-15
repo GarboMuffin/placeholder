@@ -1,4 +1,10 @@
+# Node
 node_modules
+
+# sqlite
 *.db
 *.db-shm
 *.db-wal
+
+# macOS
+.DS_Store
