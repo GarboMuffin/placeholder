@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+  </head>
+
+  <body>
+    <p>Welcome to <b>unshared</b></p>
+
+    <p>!!! EARLY PROTOTYPE BUILD !!!</p>
+
+    <input class="project" name="project" type="file" accept=".sb3">
+
+    <button class="upload">Upload</button>
+
+    <p><a hidden class="project-link" href="">Link</a></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script>
+      (function() {
+        const uploadButton = document.querySelector('.upload');
+        const fileSelector = document.querySelector('.project');
+        const projectLink = document.querySelector('.project-link');
+
+        const fetchAPI = async (path, options) => {
+          const url = `api/${path}`;
+          const res = await fetch(url, options);
+          if (!res.ok) {
+            throw new Error(`${url} returned error: ${res.status}`);
+          }
+          return res;
+        };
+
+        /**
+         * @param {File} file
+         */
+        const uploadFile = async (file) => {
+          const zip = await JSZip.loadAsync(file);
+
+          const createIncompleteProject = async () => {
+            const encodedProjectJSON = await zip.file('project.json').async('blob');
+            const body = new FormData();
+            body.append('project', encodedProjectJSON);
+            return (await fetchAPI('projects/new', {
+              method: 'POST',
+              body
+            })).json();
+          };
+
+          const incompleteProject = await createIncompleteProject();
+          const projectId = incompleteProject.id;
+          const ownershipToken = incompleteProject.ownershipToken;
+          const expires = incompleteProject.expires;
+
+          const uploadAsset = async (assetId) => {
+            const data = await zip.file(assetId).async('blob');
+            const body = new FormData();
+            body.append('asset', data);
+            body.set('ownershipToken', ownershipToken);
+            return fetchAPI(`projects/${projectId}/assets/${assetId}/upload`, {
+              method: 'POST',
+              body
+            });
+          };
+
+          await Promise.all(incompleteProject.missingAssets.map(uploadAsset));
+
+          const completeProject = async () => {
+            await fetchAPI(`projects/${projectId}/complete`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                ownershipToken
+              })
+            })
+          };
+
+          await completeProject();
+
+          return {
+            projectId,
+            ownershipToken
+          };
+        };
+
+        const OWNERSHIP_TOKEN_KEY = 'unshared:ownershipTokens';
+
+        const getOwnershipTokens = () => {
+          try {
+            const stored = localStorage.getItem(OWNERSHIP_TOKEN_KEY);
+            if (stored) {
+              return JSON.parse(stored);
+            }
+          } catch (e) {
+            // ignore
+          }
+          return {};
+        };
+
+        const storeOwnershipToken = (projectId, ownershipToken, expires) => {
+          const tokens = getOwnershipTokens();
+          tokens[projectId] = {
+            ownershipToken,
+            expires
+          };
+          try {
+            localStorage.setItem(OWNERSHIP_TOKEN_KEY, JSON.stringify(tokens))
+          } catch (e) {
+            // ignore
+          }
+        };
+
+        uploadButton.addEventListener('click', async () => {
+          const file = fileSelector.files[0];
+          if (!file) {
+            return;
+          }
+
+          try {
+            const {projectId, ownershipToken, expires} = await uploadFile(file);
+            projectLink.hidden = false;
+            projectLink.href = `projects/${projectId}`;
+            storeOwnershipToken(projectId, ownershipToken, expires);
+          } catch (e) {
+            alert(e);
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
