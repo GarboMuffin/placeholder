@@ -110,3 +110,5 @@ app.get('/projects/:id', (req, res) => {
 app.use(express.static('static'));
 
 app.listen(8732);
+
+setInterval(db.removeExpiredProjects, 1000);

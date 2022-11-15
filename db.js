@@ -24,8 +24,15 @@ CREATE TABLE IF NOT EXISTS incomplete_assets (
 ) STRICT;
 CREATE TABLE IF NOT EXISTS complete_assets (
   project_id TEXT REFERENCES projects(id) ON DELETE CASCADE,
-  asset_id TEXT REFERENCES assets(id) ON DELETE CASCADE
+  asset_id TEXT REFERENCES assets(id) ON DELETE CASCADE,
+  PRIMARY KEY(project_id, asset_id)
 ) STRICT;
+
+CREATE TRIGGER IF NOT EXISTS remove_unused_assets AFTER DELETE ON complete_assets
+BEGIN
+  DELETE FROM assets WHERE id=OLD.asset_id AND
+    NOT EXISTS (SELECT 1 FROM complete_assets WHERE asset_id=assets.id);
+END;
 `);
 
 /**
@@ -206,3 +213,11 @@ export const deleteProject = (projectId) => {
   deleteProjectStatement.run(projectId);
 };
 const deleteProjectStatement = db.prepare(`DELETE FROM projects WHERE id=?;`);
+
+export const removeExpiredProjects = () => {
+  const deleted = deleteExpiredProjectsStatement.all(now());
+  for (const project of deleted) {
+    console.log(`Expiring ${project.id}`);
+  }
+};
+const deleteExpiredProjectsStatement = db.prepare('DELETE FROM projects WHERE expires < ? RETURNING id;');
