@@ -1,9 +1,12 @@
+<svelte:head>
+  <title>Unshared Project</title>
+</svelte:head>
+
 <style>
   .project-outer {
     position: relative;
-    width: 480px;
-    height: 360px;
     border: 1px solid black;
+    margin: 20px auto;
   }
 
   .project-outer > * {
@@ -25,16 +28,15 @@
     cursor: pointer;
   }
 
-  .loading-screen {
+  .loading-screen, .error-screen {
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: black;
     flex-direction: column;
-  }
-  .loading-text {
     color: white;
   }
+
   .loading-bar-outer {
     width: 200px;
     height: 10px;
@@ -46,9 +48,22 @@
     width: 0;
     background: white;
   }
+
+  .error-details {
+    font-family: monospace;
+  }
+
+  .details {
+    max-width: 480px;
+    margin: auto;
+  }
 </style>
 
-<div class="project-outer">
+<div
+  class="project-outer"
+  style:width={`${stageWidth}px`}
+  style:height={`${stageHeight}px`}
+>
   <div class="project-screen" bind:this={scaffoldingContainer}></div>
 
   {#if !isStarted}
@@ -65,18 +80,25 @@
       </div>
     </div>
   {/if}
+
+  {#if error}
+    <div class="error-screen">
+      <p class="error-title">Error</p>
+      <p class="error-details">{error}</p>
+    </div>
+  {/if}
 </div>
 
-<div class="metadata-section">
-  <p>This project will be deleted on <span class="expiration-date">{expirationDate}</span>.</p>
-</div>
 
-{#if ownershipToken}
-  <div class="owner-section">
+<div class="details">
+  <p>During the early prototype period, projects will be deleted at random.</p>
+
+  {#if ownershipToken}
     <p>You own this project.</p>
     <button class="delete-button" on:click={deleteProject}>Delete</button>
-  </div>
-{/if}
+  {/if}
+</div>
+
 
 <script lang="ts">
   import type {PageData} from './$types';
@@ -97,6 +119,9 @@
   let isLoaded = false;
   let isStarted = false;
   let vm: any;
+  let stageWidth: number = 480;
+  let stageHeight: number = 360;
+  let error: unknown;
 
   const getProjectData = async () => {
     return await (await fetch(`/api/projects/${projectId}`)).arrayBuffer();
@@ -154,6 +179,9 @@
   };
 
   if (browser) {
-    loadProject();
+    loadProject()
+      .catch((e) => {
+        error = e;
+      });
   }
 </script>
