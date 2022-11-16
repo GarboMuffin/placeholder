@@ -4,5 +4,9 @@ import * as db from '$lib/server/db';
 
 export const load: PageServerLoad = ({params}) => {
   const projectMetadata = db.getProjectMetadata(params.project);
-  return projectMetadata;
+  const md5extsToSha256 = db.getMd5extToSha256(params.project);
+  return {
+    metadata: projectMetadata,
+    md5extsToSha256
+  };
 };

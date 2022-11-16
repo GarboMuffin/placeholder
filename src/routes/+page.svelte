@@ -1,4 +1,8 @@
-<p>Welcome to <b>unshared</b></p>
+<style>
+
+</style>
+
+<!-- <p>Welcome to <b>unshared</b></p> -->
 
 <input class="project" name="project" type="file" accept=".sb3" bind:this={fileInput}>
 
@@ -12,6 +16,8 @@
 
 <script lang="ts">
   import { storeLocalProjectData } from '$lib/local-project-data';
+  import { parseProject } from '$lib/parse';
+  import type { IncompleteProject } from '$lib/server/db';
 
   let fileInput: HTMLInputElement;
 
@@ -26,22 +32,31 @@
     const JSZip = (await import('jszip')).default;
     const zip = await JSZip.loadAsync(file);
 
-    const createIncompleteProject = async () => {
-      const projectJSONFile = zip.file('project.json');
-      if (!projectJSONFile) {
-        throw new Error('No project.json');
-      }
-      const projectJSONData = await projectJSONFile.async('blob');
-      const body = new FormData();
-      body.append('project', projectJSONData);
-      return (await fetch('/api/projects/new', {
-        method: 'POST',
-        body
-      })).json();
-    };
+    const projectJSONFile = zip.file('project.json');
+    if (!projectJSONFile) {
+      throw new Error('No project.json');
+    }
+    const projectJSONData = await projectJSONFile.async('blob');
+    const parsedProject = parseProject(await projectJSONData.text());
 
-    const incompleteProject = await createIncompleteProject();
-    const projectId = incompleteProject.id;
+    const md5extsToSha256: Record<string, string> = {};
+    for (const md5ext of parsedProject.md5exts) {
+      const data = await zip.file(md5ext)!.async('arraybuffer');
+      const sha256Buffer = await crypto.subtle.digest('SHA-256', data);
+      const sha256Array = Array.from(new Uint8Array(sha256Buffer));
+      const sha256 = sha256Array.map((b) => b.toString(16).padStart(2, '0')).join('');
+      md5extsToSha256[md5ext] = sha256;
+    }
+
+    const newProjectBody = new FormData();
+    newProjectBody.append('project', projectJSONData);
+    newProjectBody.append('md5exts', JSON.stringify(md5extsToSha256));
+    const incompleteProject: IncompleteProject = await (await fetch('/api/projects/new', {
+      method: 'POST',
+      body: newProjectBody
+    })).json();
+
+    const projectId = incompleteProject.projectId;
     const ownershipToken = incompleteProject.ownershipToken;
     const expires = incompleteProject.expires;
 
@@ -54,13 +69,13 @@
       const body = new FormData();
       body.append('asset', assetData);
       body.set('ownershipToken', ownershipToken);
-      return fetch(`/api/projects/${projectId}/assets/${assetId}/upload`, {
+      return fetch(`/api/projects/${projectId}/assets/${assetId}`, {
         method: 'POST',
         body
       });
     };
 
-    await Promise.all(incompleteProject.missingAssets.map(uploadAsset));
+    await Promise.all(incompleteProject.missingMd5exts.map(uploadAsset));
 
     const completeProject = async () => {
       await fetch(`/api/projects/${projectId}/complete`, {

@@ -1,8 +1,8 @@
 import {error, json} from '@sveltejs/kit';
 import type {RequestHandler} from './$types';
 import * as db from '$lib/server/db';
-import nodeCrypto from 'node:crypto';
 import { getFileFromBody, validateOwnershipToken } from '$lib/server/utils';
+import nodeCrypto from 'node:crypto';
 
 export const POST: RequestHandler = async ({request, url, params}) => {
   const body = await request.formData();
@@ -15,13 +15,23 @@ export const POST: RequestHandler = async ({request, url, params}) => {
   }
 
   const assetData = new Uint8Array(await assetFile.arrayBuffer());
-  const actualMd5sum = nodeCrypto
+
+  const actualMd5 = nodeCrypto
     .createHash('md5')
     .update(assetData)
     .digest('hex');
-  const expectedMd5sum = params.asset.split('.')[0];
-  if (actualMd5sum !== expectedMd5sum) {
-    throw error(400, `expected md5 ${expectedMd5sum} but got ${actualMd5sum}`);
+  const expectedMd5 = params.asset.split('.')[0];
+  if (actualMd5 !== expectedMd5) {
+    throw error(400, `expected md5 ${expectedMd5} but got ${actualMd5}`);
+  }
+
+  const actualSha256 = nodeCrypto
+    .createHash('sha256')
+    .update(assetData)
+    .digest('hex');
+  const expectedSha256 = db.getExpectedSha256(params.project, params.asset);
+  if (actualSha256 !== expectedSha256) {
+    throw error(400, `expected sha256 ${expectedSha256} but got ${actualSha256}`);
   }
 
   db.completeAsset(params.project, params.asset, assetData);

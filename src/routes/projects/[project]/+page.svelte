@@ -83,10 +83,11 @@
   import {page} from '$app/stores';
   import {browser} from '$app/environment';
   import {getOwnershipToken} from '$lib/local-project-data';
+
   export let data: PageData;
 
   const projectId = $page.params.project;
-  const expirationDate = new Date(data.expires * 1000).toLocaleString();
+  const expirationDate = new Date(data.metadata.expires * 1000).toLocaleString();
   const ownershipToken = getOwnershipToken(projectId);
 
   let progress = 0;
@@ -116,7 +117,14 @@
     const storage = scaffolding.storage;
     storage.addWebStore(
       [storage.AssetType.ImageVector, storage.AssetType.ImageBitmap, storage.AssetType.Sound],
-      (asset: any) => new URL(`/api/assets/${asset.assetId}.${asset.dataFormat}`, location.href).href
+      (asset: any) => {
+        const md5ext = `${asset.assetId}.${asset.dataFormat}`;
+        const sha256 = data.md5extsToSha256[md5ext];
+        if (typeof sha256 !== 'string') {
+          throw new Error(`Unknown asset ${md5ext}`);
+        }
+        return new URL(`/api/assets/${sha256}`, location.href).href;
+      }
     );
     storage.onprogress = (total: number, loaded: number) => {
       progress = 0.2 + (loaded / total) * 0.8;

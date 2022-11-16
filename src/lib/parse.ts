@@ -12,7 +12,7 @@ const ASSET_ID_REGEX = /^[0-9a-f]{32}$/;
 const isObject = (i: unknown): i is object => typeof i === 'object' && !!i;
 
 export interface ParsedProject {
-  assets: string[];
+  md5exts: string[];
 }
 
 export const parseProject = (projectData: string): ParsedProject => {
@@ -60,6 +60,6 @@ export const parseProject = (projectData: string): ParsedProject => {
     });
 
   return {
-    assets: Array.from(new Set(md5exts))
+    md5exts: Array.from(new Set(md5exts))
   };
 };
