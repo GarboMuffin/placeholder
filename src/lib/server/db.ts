@@ -1,5 +1,5 @@
 import sqlite from 'better-sqlite3';
-import {v4 as uuid} from 'uuid';
+import type {ParsedProject} from '$lib/parse';
 
 const db = new sqlite('unshared.db');
 
@@ -36,27 +36,23 @@ END;
 `);
 
 /**
- * All time values stored in the database are in seconds since the UNIX epoch.
- * @returns {number}
+ * All times in the database are in seconds since the unix epoch.
  */
-export const now = () => Math.round(Date.now() / 1000);
+export const now = (): number => Math.round(Date.now() / 1000);
 
-/**
- * @typedef IncompleteProject
- * @property {string} id
- * @property {number} expires
- * @property {string[]} missingAssets List of md5exts that the server is not yet aware of.
- * @property {string} ownershipToken A special token that can later be used to prove ownership of the project
- */
+interface IncompleteProject {
+  id: string;
+  expires: number;
+  missingAssets: string[];
+  ownershipToken: string;
+}
 
-/**
- * @param {Buffer} encodedProjectJSON
- * @param {import('./parse').ParsedProject} parsedProject
- * @returns {IncompleteProject}
- */
-export const createIncompleteProject = (encodedProjectJSON, parsedProject) => {
-  const projectId = uuid();
-  const ownershipToken = `o:${uuid()}`;
+const insertProjectStatement = db.prepare(`
+  INSERT INTO projects (id, complete, data, expires, ownership_token) VALUES (?, FALSE, ?, ?, ?);
+`);
+export const createIncompleteProject = (encodedProjectJSON: Buffer, parsedProject: ParsedProject): IncompleteProject => {
+  const projectId = crypto.randomUUID();
+  const ownershipToken = `o:${crypto.randomUUID()}`;
   const expires = now() + 60 * 60 * 24;
   console.log(`Creating incomplete project ${projectId}`);
 
@@ -80,69 +76,45 @@ export const createIncompleteProject = (encodedProjectJSON, parsedProject) => {
     ownershipToken
   };
 };
-const insertProjectStatement = db.prepare(`
-  INSERT INTO projects (id, complete, data, expires, ownership_token) VALUES (?, FALSE, ?, ?, ?);
-`);
 
-/**
- * @param {string} projectId
- * @returns {string}
- */
-export const getOwnershipToken = (projectId) => {
+const getOwnershipTokenStatement = db.prepare('SELECT ownership_token FROM projects WHERE id = ?;');
+export const getOwnershipToken = (projectId: string): string => {
   const result = getOwnershipTokenStatement.get(projectId);
   if (!result) {
     throw new Error(`No project with ID ${projectId}`);
   }
   return result.ownership_token;
 };
-const getOwnershipTokenStatement = db.prepare('SELECT ownership_token FROM projects WHERE id = ?;');
 
-/**
- * @param {string} projectId
- */
-export const completeNewProject = (projectId) => {
+const finalizeProjectStatement = db.prepare('UPDATE projects SET complete=TRUE WHERE id=?;');
+export const completeNewProject = (projectId: string): void => {
   console.log(`Completing ${projectId}`);
   finalizeProjectStatement.run(projectId);
 };
-const finalizeProjectStatement = db.prepare('UPDATE projects SET complete=TRUE WHERE id=?;');
 
-/**
- * @param {string} assetId
- * @returns {boolean}
- */
-export const doesAssetExist = (assetId) => {
+const doesAssetExistStatement = db.prepare('SELECT 1 FROM assets WHERE id = ?;');
+export const doesAssetExist = (assetId: string): boolean => {
   return !!doesAssetExistStatement(assetId);  
 };
-const doesAssetExistStatement = db.prepare('SELECT 1 FROM assets WHERE id = ?;');
 
-/**
- * @param {string} projectId
- * @param {string} assetId
- */
-export const addIncompleteAsset = (projectId, assetId) => {
-  console.log(`Adding incomplete asset ${assetId} for ${projectId}`);
-  insertIncompleteAssetStatement.run(projectId, assetId);
-};
 const insertIncompleteAssetStatement = db.prepare(`
   INSERT INTO incomplete_assets (project_id, asset_id) VALUES (?, ?);
 `);
+export const addIncompleteAsset = (projectId: string, assetId: string): void => {
+  console.log(`Adding incomplete asset ${assetId} for ${projectId}`);
+  insertIncompleteAssetStatement.run(projectId, assetId);
+};
 
-/**
- * @param {string} projectId
- * @param {string} assetId
- */
-export const addCompleteAssetConnection = (projectId, assetId) => {
+const insertAssetConnectionStatement = db.prepare(`INSERT INTO complete_assets (project_id, asset_id) VALUES (?, ?);`);
+export const addCompleteAssetConnection = (projectId: string, assetId: string): void => {
   console.log(`Adding complete asset ${assetId} for ${projectId}`);
   insertAssetConnectionStatement.run(projectId, assetId);
 };
-const insertAssetConnectionStatement = db.prepare(`INSERT INTO complete_assets (project_id, asset_id) VALUES (?, ?);`);
 
-/**
- * @param {string} projectId
- * @param {string} assetId
- * @param {Buffer} data
- */
-export const completeAsset = (projectId, assetId, data) => {
+const getIncompleteAssetStatement = db.prepare(`SELECT * FROM incomplete_assets WHERE project_id=? AND asset_id=?;`);
+const deleteIncompleteAssetStatement = db.prepare(`DELETE FROM incomplete_assets WHERE project_id=? AND asset_id=?;`);
+const insertAssetStatement = db.prepare(`INSERT INTO assets (id, data) VALUES (?, ?);`);
+export const completeAsset = (projectId: string, assetId: string, data: Uint8Array) => {
   console.log(`Completing asset ${assetId} for ${projectId}`);
   const doesIncompleteAssetExist = getIncompleteAssetStatement.get(projectId, assetId);
   if (!doesIncompleteAssetExist) {
@@ -152,20 +124,14 @@ export const completeAsset = (projectId, assetId, data) => {
   insertAssetStatement.run(assetId, data);
   addCompleteAssetConnection(projectId, assetId);
 };
-const getIncompleteAssetStatement = db.prepare(`SELECT * FROM incomplete_assets WHERE project_id=? AND asset_id=?;`);
-const deleteIncompleteAssetStatement = db.prepare(`DELETE FROM incomplete_assets WHERE project_id=? AND asset_id=?;`);
-const insertAssetStatement = db.prepare(`INSERT INTO assets (id, data) VALUES (?, ?);`);
 
-/**
- * @typedef ProjectMetadata
- * @property {boolean} complete
- * @property {number} expires
- */
+interface ProjectMetadata {
+  complete: boolean;
+  expires: number;
+}
 
-/**
- * @param {string} projectId
- */
-export const getProjectMetadata = (projectId) => {
+const getMetadataStatement = db.prepare('SELECT complete, expires FROM projects WHERE id=?;');
+export const getProjectMetadata = (projectId: string): ProjectMetadata => {
   const projectMeta = getMetadataStatement.get(projectId);
   if (!projectMeta) {
     throw new Error('No project with ID');
@@ -175,13 +141,9 @@ export const getProjectMetadata = (projectId) => {
     expires: projectMeta.expires
   };
 };
-const getMetadataStatement = db.prepare('SELECT complete, expires FROM projects WHERE id=?;');
 
-/**
- * @param {string} projectId
- * @returns {Buffer}
- */
-export const getProjectData = (projectId) => {
+const getProjectStatement = db.prepare('SELECT data FROM projects WHERE id=?;');
+export const getProjectData = (projectId: string): Buffer => {
   const metadata = getProjectMetadata(projectId);
   if (!metadata.complete) {
     throw new Error('Project is incomplete');
@@ -190,13 +152,8 @@ export const getProjectData = (projectId) => {
   // we can assume project is defined because metadata exists
   return project.data;
 };
-const getProjectStatement = db.prepare('SELECT data FROM projects WHERE id=?;');
 
-/**
- * @param {string} assetId
- * @returns {Buffer}
- */
-export const getAssetData = (assetId) => {
+export const getAssetData = (assetId: string): Buffer => {
   const asset = getAssetStatement.get(assetId);
   if (!asset) {
     throw new Error('No asset with ID');
@@ -205,16 +162,13 @@ export const getAssetData = (assetId) => {
 };
 const getAssetStatement = db.prepare('SELECT data FROM assets WHERE id=?;');
 
-/**
- * @param {string} projectId
- */
-export const deleteProject = (projectId) => {
+export const deleteProject = (projectId: string): void => {
   console.log(`Deleting ${projectId}`);
   deleteProjectStatement.run(projectId);
 };
 const deleteProjectStatement = db.prepare(`DELETE FROM projects WHERE id=?;`);
 
-export const removeExpiredProjects = () => {
+export const removeExpiredProjects = (): void => {
   const deleted = deleteExpiredProjectsStatement.all(now());
   for (const project of deleted) {
     console.log(`Expiring ${project.id}`);

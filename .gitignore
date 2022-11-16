@@ -8,3 +8,13 @@ node_modules
 
 # macOS
 .DS_Store
+
+# sveltekit
+/build
+/.svelte-kit
+/package
+
+# environment variables
+.env
+.env.*
+!.env.example

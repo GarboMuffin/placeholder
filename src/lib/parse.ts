@@ -9,23 +9,20 @@ const DATA_FORMATS = [
 // intentionally not case insensitive
 const ASSET_ID_REGEX = /^[0-9a-f]{32}$/;
 
-const isObject = (i) => typeof i === 'object' && !!i;
+const isObject = (i: unknown): i is object => typeof i === 'object' && !!i;
 
-/**
- * @typedef ParsedProject
- * @property {string[]} assets
- */
+export interface ParsedProject {
+  assets: string[];
+}
 
-/**
- * @param {unknown} projectJSON
- * @returns {string[]} List of md5exts that the project contains.
- */
-export const parseProject = (projectJSON) => {
+export const parseProject = (projectData: string): ParsedProject => {
+  const projectJSON: unknown = JSON.parse(projectData);
+
   if (!isObject(projectJSON)) {
     throw new Error('project is not an object');
   }
 
-  const targets = projectJSON.targets;
+  const targets = (projectJSON as any).targets;
   if (!Array.isArray(targets)) {
     throw new Error('targets is not an array');
   }
@@ -42,7 +39,7 @@ export const parseProject = (projectJSON) => {
         throw new Error('asset is not an object');
       }
 
-      const md5 = asset.assetId;
+      const md5 = (asset as any).assetId;
       if (typeof md5 !== 'string') {
         throw new Error('md5 is not string');
       }
@@ -50,7 +47,7 @@ export const parseProject = (projectJSON) => {
         throw new Error(`Invalid md5: ${md5}`);
       }
 
-      const dataFormat = asset.dataFormat;
+      const dataFormat = (asset as any).dataFormat;
       if (typeof dataFormat !== 'string') {
         throw new Error('dataFormat is not string');
       }
