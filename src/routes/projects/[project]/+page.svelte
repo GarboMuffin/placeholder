@@ -6,7 +6,7 @@
   .project-outer {
     position: relative;
     border: 1px solid black;
-    margin: 20px auto;
+    margin: 16px auto;
   }
 
   .project-outer > * {
@@ -99,17 +99,15 @@
   {/if}
 </div>
 
-
 <script lang="ts">
   import type {PageData} from './$types';
   import {page} from '$app/stores';
-  import {browser} from '$app/environment';
   import {getOwnershipToken} from '$lib/local-project-data';
+  import { onMount } from 'svelte';
 
   export let data: PageData;
 
   const projectId = $page.params.project;
-  const expirationDate = new Date(data.metadata.expires * 1000).toLocaleString();
   const ownershipToken = getOwnershipToken(projectId);
 
   let progress = 0;
@@ -131,7 +129,11 @@
     const projectData = await getProjectData();
     progress = 0.1;
 
+    // @ts-expect-error
     await import('@turbowarp/packager/dist/scaffolding/scaffolding-full');
+    // @ts-expect-error
+    const Scaffolding: any = window.Scaffolding;
+
     const scaffolding = new Scaffolding.Scaffolding();
     scaffolding.setup();
     scaffolding.appendTo(scaffoldingContainer);
@@ -178,10 +180,13 @@
     alert('Deleted');
   };
 
-  if (browser) {
+  onMount(() => {
+    // All navigations away from this page should completely reload the page.
+    document.documentElement.setAttribute('data-sveltekit-reload', '');
+
     loadProject()
       .catch((e) => {
         error = e;
       });
-  }
+  });
 </script>

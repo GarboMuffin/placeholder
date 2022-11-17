@@ -6,10 +6,13 @@
 
 <style>
   .outer {
-    margin: 20px 0;
+    position: relative;
+    margin: 16px 0;
+    padding: 16px 0;
     width: 100%;
     height: 50px;
-    border: 5px dashed #555;
+    color: #555;
+    border: 5px dashed currentColor;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -18,11 +21,28 @@
     text-align: center;
   }
   .dropping {
-    border-color: #55a;
+    color: #55a;
+  }
+  .outer:focus-within {
+    outline: 2px solid #55a;
+  }
+  .label {
+    font-size: 1.25em;
+    margin-bottom: 8px;
+  }
+
+  input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
   }
 
   .uploaded-project {
-    margin: 20px 0;
+    margin: 16px 0;
     padding: 8px;
     background: rgb(113, 255, 113);
     border: 1px solid rgb(46, 216, 46);
@@ -31,6 +51,8 @@
 </style>
 
 <label class="outer" class:dropping={isDropping}>
+  <!-- use hidden instead of a svelte {#if} because we don't want the input element -->
+  <!-- to be removed. That might break our File objects. -->
   <input
     type="file"
     accept=".sb3"
@@ -45,20 +67,17 @@
       <div>{progressText}</div>
       <progress value={progress} />
     </div>
+  {:else}
+    <div class="label">Select or drop a .sb3 file</div>
   {/if}
 </label>
 
 {#if uploadedProject}
   <div class="uploaded-project">
     <p>Success! Your project was uploaded. Here is your link:</p>
-    <p><a href={projectURL}>{projectURL}</a></p>
+    <p><a data-sveltekit-reload href={projectURL}>{projectURL}</a></p>
     <p><b>During the early prototype period, all projects will be deleted randomly.</b></p>
-    <p>Anyone with this link
-      <select value="view">
-        <option value="view">can view</option>
-        <option value="edit" disabled>can edit (maybe eventually)</option>
-      </select>.
-    </p>
+    <p>Only you will be able to edit the project's information (we've stored a secret token in your browser to prove ownership).</p>
   </div>
 {/if}
 
@@ -141,8 +160,9 @@
         method: 'POST',
         body
       });
+      await res.json();
       uploadedAssets++;
-      progress = 0.2 + (uploadedAssets / totalAssetsToUpload);
+      progress = 0.2 + (uploadedAssets / totalAssetsToUpload) * 0.8;
     };
 
     await Promise.all(incompleteProject.missingMd5exts.map(uploadAsset));
@@ -186,11 +206,12 @@
         uploadedProject.ownershipToken,
         uploadedProject.expires
       );
-      isUploading = false;
     } catch (e) {
       console.error(e);
       alert(e);
     }
+
+    isUploading = false;
   };
 
   let isDropping = false;

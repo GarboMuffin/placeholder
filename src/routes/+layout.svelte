@@ -12,7 +12,7 @@
   }
 
   footer {
-    margin: 20px 0;
+    margin: 16px 0;
     color: #555;
     display: flex;
     align-items: center;
@@ -33,7 +33,7 @@
     display: flex;
   }
   .link-gap {
-    width: 20px;
+    width: 16px;
   }
 </style>
 
@@ -45,9 +45,9 @@
   </div>
 
   <div class="links">
-    <a href="https://github.com/sponsors/GarboMuffin">Donate</a>
-    <div class="link-gap" />
     <a href="/">Home</a>
+    <div class="link-gap" />
+    <a href="https://github.com/sponsors/GarboMuffin">Donate</a>
     <div class="link-gap" />
     <a href="/privacy">Privacy</a>
     <div class="link-gap" />
