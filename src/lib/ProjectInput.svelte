@@ -10,7 +10,8 @@
     margin: 16px 0;
     padding: 16px 0;
     width: 100%;
-    height: 50px;
+    height: 100px;
+    box-sizing: border-box;
     color: #555;
     border: 5px dashed currentColor;
     border-radius: 10px;
@@ -19,6 +20,11 @@
     justify-content: center;
     flex-direction: column;
     text-align: center;
+  }
+  @media (prefers-color-scheme: dark) {
+    .outer {
+      color: #aaa;
+    }
   }
   .dropping {
     color: #55a;
@@ -42,11 +48,15 @@
   }
 
   .uploaded-project {
+    color: black;
     margin: 16px 0;
     padding: 8px;
     background: rgb(113, 255, 113);
     border: 1px solid rgb(46, 216, 46);
     border-radius: 10px;
+  }
+  .uploaded-project a {
+    color: blue;
   }
 </style>
 

@@ -1,9 +1,11 @@
 <style>
-  :global(:root) {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  }
   :global(body) {
     margin: 0;
+  }
+
+  :root {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color-scheme: light dark;
   }
 
   .title {
@@ -17,6 +19,12 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+    text-align: center;
+  }
+  @media (prefers-color-scheme: dark) {
+    footer {
+      color: #aaa;
+    }
   }
   footer > * {
     margin: 10px 0;
