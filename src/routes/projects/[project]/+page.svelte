@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Unshared Project</title>
+  <title>{projectTitle} - {APP_NAME}</title>
 </svelte:head>
 
 <style>
@@ -7,6 +7,8 @@
     position: relative;
     border: 1px solid black;
     margin: 16px auto;
+    border-radius: 8px;
+    overflow: hidden;
   }
 
   .project-outer > * {
@@ -57,7 +59,56 @@
     max-width: 480px;
     margin: auto;
   }
+
+  .title {
+    display: block;
+    font: inherit;
+    font-size: 2em;
+    background: none;
+    padding: 0;
+    margin: 16px 0;
+    border: none;
+    width: 100%;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .description {
+    display: block;
+    font: inherit;
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    min-height: 100px;
+    padding: 8px;
+    border-radius: 8px;
+    margin: 16px 0;
+    box-sizing: border-box;
+    border: 1px solid #b9d6ff;
+    background-color: #dbebff;
+  }
+  @media (prefers-color-scheme: dark) {
+    .description {
+      border-color: #2063c1;
+      background-color: #184677;
+    }
+  }
 </style>
+
+<div class="details">
+  {#if ownershipToken}
+    <input
+      class="title"
+      value={data.metadata.title}
+      on:change={editProjectTitle}
+      autocomplete="off"
+    >
+  {:else}
+    <h1 class="title">{data.metadata.title}</h1>
+  {/if}
+</div>
 
 <div
   class="project-outer"
@@ -89,13 +140,26 @@
   {/if}
 </div>
 
-
 <div class="details">
+  {#if ownershipToken}
+    <textarea
+      class="description"
+      value={data.metadata.description}
+      on:change={editProjectDescription}
+      autocomplete="off"
+    ></textarea>
+  {:else}
+    <p class="description">{data.metadata.description}</p>
+  {/if}
+
   <p>During the early prototype period, projects will be deleted at random.</p>
 
   {#if ownershipToken}
-    <p>You own this project.</p>
-    <button class="delete-button" on:click={deleteProject}>Delete</button>
+    <div class="owner-section">
+      <p>
+        <button on:click={deleteProject}>Delete this project</button>
+      </p>
+    </div>
   {/if}
 </div>
 
@@ -104,16 +168,18 @@
   import {page} from '$app/stores';
   import {getOwnershipToken} from '$lib/local-project-data';
   import { onMount } from 'svelte';
+  import { APP_NAME } from '$lib/brand';
 
   export let data: PageData;
 
   const projectId = $page.params.project;
   const ownershipToken = getOwnershipToken(projectId);
+  let projectTitle = data.metadata.title;
+  let projectDescription = data.metadata.description;
 
   let progress = 0;
 
   let scaffoldingContainer: HTMLElement;
-
   let isLoaded = false;
   let isStarted = false;
   let vm: any;
@@ -146,7 +212,7 @@
       [storage.AssetType.ImageVector, storage.AssetType.ImageBitmap, storage.AssetType.Sound],
       (asset: any) => {
         const md5ext = `${asset.assetId}.${asset.dataFormat}`;
-        const sha256 = data.md5extsToSha256[md5ext];
+        const sha256 = data.md5extsToSha256![md5ext];
         if (typeof sha256 !== 'string') {
           throw new Error(`Unknown asset ${md5ext}`);
         }
@@ -167,26 +233,48 @@
     isStarted = true;
   };
 
-  const deleteProject = async () => {
-    await fetch(`/api/projects/${projectId}`, {
-      method: 'DELETE',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        ownershipToken
-      })
+  const editProjectDescription = async (e: Event) => {
+    const body = new FormData();
+    body.set('ownershipToken', String(ownershipToken));
+    body.set('description', (e.target as HTMLTextAreaElement).value);
+    const res = await fetch(`/api/projects/${projectId}`, {
+      method: 'POST',
+      body
     });
-    alert('Deleted');
+  };
+
+  const editProjectTitle = async (e: Event) => {
+    const body = new FormData();
+    body.set('ownershipToken', String(ownershipToken));
+    const newTitle = (e.target as HTMLInputElement).value;
+    projectTitle = newTitle;
+    body.set('title', newTitle);
+    const res = await fetch(`/api/projects/${projectId}`, {
+      method: 'POST',
+      body
+    });
+  };
+
+  const deleteProject = async () => {
+    if (confirm('Are you sure you want to delete the project?')) {
+      const body = new FormData();
+      body.set('ownershipToken', String(ownershipToken));
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: 'DELETE',
+        body
+      });
+    }
   };
 
   onMount(() => {
-    // All navigations away from this page should completely reload the page.
-    document.documentElement.setAttribute('data-sveltekit-reload', '');
-
-    loadProject()
-      .catch((e) => {
-        error = e;
-      });
+    if (data.metadata) {
+      // All navigations away from this page should completely reload the page.
+      document.documentElement.setAttribute('data-sveltekit-reload', '');
+  
+      loadProject()
+        .catch((e) => {
+          error = e;
+        });
+    }
   });
 </script>

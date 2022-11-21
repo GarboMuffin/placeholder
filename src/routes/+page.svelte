@@ -1,5 +1,10 @@
+<script lang="ts">
+  import { APP_NAME } from '$lib/brand';
+  import ProjectInput from '$lib/ProjectInput.svelte';
+</script>
+
 <svelte:head>
-  <title>unshared</title>
+  <title>{APP_NAME}</title>
 </svelte:head>
 
 <style>
@@ -31,7 +36,7 @@
 </style>
 
 <section class="header">
-  <h1>Welcome to <span class="fancy">unshared.</span></h1>
+  <h1>Welcome to <span class="fancy">{APP_NAME}.</span></h1>
   <p>Working title. Early protoype.</p>
   <p>Select or drop a .sb3 file and we'll create a temporary link that anyone can use to view the project.</p>
 </section>
@@ -42,7 +47,7 @@
 
 <section class="questions">
   <h2>How do I get the .sb3 file?</h2>
-  <p>Go to Scratch &gt; Go to My Stuff &gt; Open your project &gt; See inside &gt; Open the "File" in the top left corner &gt; Press "Save to your computer" &gt; Upload this project to unshared.</p>
+  <p>Go to Scratch &gt; Go to My Stuff &gt; Open your project &gt; See inside &gt; Open the "File" in the top left corner &gt; Press "Save to your computer" &gt; Upload the downloaded file to this site.</p>
 
   <h2>Can I share links to this site on Scratch?</h2>
   <p>It is not advised to.</p>
@@ -65,7 +70,3 @@
   <h2>Where is the source code?</h2>
   <p>Will be available soon. Making this easy to self-host is a priority.</p>
 </section>
-
-<script lang="ts">
-  import ProjectInput from '$lib/ProjectInput.svelte';
-</script>

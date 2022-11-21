@@ -1,3 +1,7 @@
+<script>
+  import { APP_NAME } from '$lib/brand';
+</script>
+
 <style>
   :global(body) {
     margin: 0;
@@ -49,7 +53,7 @@
 
 <footer>
   <div class="disclaimer">
-    <span class="title">unshared</span> is not affiliated with Scratch, the Scratch Team, or the Scratch Foundation.
+    <span class="title">{APP_NAME}</span> is not affiliated with Scratch, the Scratch Team, or the Scratch Foundation.
   </div>
 
   <div class="links">

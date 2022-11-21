@@ -25,6 +25,16 @@ export const POST: RequestHandler = async ({request, url}) => {
     }
   }
 
-  const incompleteProject = db.createIncompleteProject(Buffer.from(projectData), parsedProject, parsedMd5exts);
+  const title = body.get('title');
+  if (typeof title !== 'string') {
+    throw error(400, 'invalid or missing title');
+  }
+
+  const incompleteProject = db.createIncompleteProject(
+    Buffer.from(projectData),
+    parsedProject,
+    parsedMd5exts,
+    title
+  );
   return json(incompleteProject);
 };

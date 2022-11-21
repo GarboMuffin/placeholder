@@ -1,3 +1,7 @@
+<script>
+  import { CONTACT } from "$lib/brand";
+</script>
+
 <svelte:head>
   <title>Contact</title>
 </svelte:head>
@@ -11,5 +15,5 @@
 
 <main>
   <h1>Contact</h1>
-  <p>Email us: unshared at turbowarp dot org</p>  
+  <p>Email us: {CONTACT}</p>  
 </main>

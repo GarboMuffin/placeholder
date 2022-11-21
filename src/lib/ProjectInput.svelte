@@ -113,6 +113,8 @@
   let progress: number = 0;
 
   const uploadProject = async (file: File) => {
+    const title = file.name.replace(/\.sb3$/, '');
+
     progress = 0;
     progressText = 'Loading JSZip';
     const JSZip = (await import('jszip')).default;
@@ -142,6 +144,7 @@
     const newProjectBody = new FormData();
     newProjectBody.append('project', projectJSONData);
     newProjectBody.append('md5exts', JSON.stringify(md5extsToSha256));
+    newProjectBody.append('title', title);
     const incompleteProject: IncompleteProject = await (await fetch('/api/projects/new', {
       method: 'POST',
       body: newProjectBody

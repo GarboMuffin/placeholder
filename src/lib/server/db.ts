@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS projects (
   complete INT NOT NULL,
   data BLOB NOT NULL,
   expires INTEGER NOT NULL,
-  ownership_token TEXT NOT NULL
+  ownership_token TEXT NOT NULL,
+  project_title TEXT NOT NULL,
+  project_description TEXT NOT NULL
 ) STRICT;
 CREATE TABLE IF NOT EXISTS assets (
   asset_sha256 TEXT PRIMARY KEY NOT NULL,
@@ -50,15 +52,36 @@ export interface IncompleteProject {
 }
 
 const insertProjectStatement = db.prepare(`
-  INSERT INTO projects (project_id, complete, data, expires, ownership_token) VALUES (?, FALSE, ?, ?, ?);
+  INSERT INTO projects (
+    project_id,
+    complete,
+    data,
+    expires,
+    ownership_token,
+    project_title,
+    project_description
+  ) VALUES (?, FALSE, ?, ?, ?, ?, ?);
 `);
-export const createIncompleteProject = (encodedProjectJSON: Buffer, parsedProject: ParsedProject, md5extsToSha256: Record<string, string>): IncompleteProject => {
+export const createIncompleteProject = (
+  encodedProjectJSON: Buffer,
+  parsedProject: ParsedProject,
+  md5extsToSha256: Record<string, string>,
+  projectTitle: string
+): IncompleteProject => {
   const projectId = crypto.randomUUID();
   const ownershipToken = `o:${crypto.randomUUID()}`;
   const expires = now() + 60 * 60 * 24;
+  const projectDescription = '';
   console.log(`Creating incomplete project ${projectId}`);
 
-  insertProjectStatement.run(projectId, encodedProjectJSON, expires, ownershipToken);
+  insertProjectStatement.run(
+    projectId,
+    encodedProjectJSON,
+    expires,
+    ownershipToken,
+    projectTitle,
+    projectDescription
+  );
 
   const missingMd5exts = [];
   for (const md5ext of parsedProject.md5exts) {
@@ -138,17 +161,28 @@ export const completeAsset = (projectId: string, md5ext: string, data: Uint8Arra
 };
 
 interface ProjectMetadata {
+  title: string;
+  description: string;
   complete: boolean;
   expires: number;
 }
 
-const getMetadataStatement = db.prepare('SELECT complete, expires FROM projects WHERE project_id=?;');
+const getMetadataStatement = db.prepare(`
+  SELECT
+    project_title,
+    project_description,
+    complete,
+    expires
+  FROM projects WHERE project_id=?;
+`);
 export const getProjectMetadata = (projectId: string): ProjectMetadata => {
   const projectMeta = getMetadataStatement.get(projectId);
   if (!projectMeta) {
     throw new Error('No project with ID');
   }
   return {
+    title: projectMeta.project_title,
+    description: projectMeta.project_description,
     complete: projectMeta.complete === 1,
     expires: projectMeta.expires
   };
@@ -182,6 +216,16 @@ export const getAssetData = (sha256: string): Buffer => {
     throw new Error('No asset with ID');
   }
   return asset.data;
+};
+
+const setProjectTitleStatement = db.prepare(`UPDATE projects SET project_title=? WHERE project_id=?;`);
+export const setProjectTitle = (projectId: string, title: string): void => {
+  setProjectTitleStatement.run(title, projectId);
+};
+
+const setProjectDescriptionStatement = db.prepare(`UPDATE projects SET project_description=? WHERE project_id=?;`);
+export const setProjectDescription = (projectId: string, title: string): void => {
+  setProjectDescriptionStatement.run(title, projectId);
 };
 
 const deleteProjectStatement = db.prepare(`DELETE FROM projects WHERE project_id=?;`);
