@@ -1,14 +1,13 @@
 import {error} from '@sveltejs/kit';
 import * as db from './db';
 
-export const validateOwnershipToken = (givenToken: unknown, projectId: string) => {
+export const validateOwnership = (projectId: string, givenToken: unknown) => {
   if (typeof givenToken !== 'string') {
     throw error(400, 'ownership token missing or invalid type');
   }
 
-  const actualToken = db.getOwnershipToken(projectId);
-  // TODO: do we have to make this constant time?
-  if (givenToken !== actualToken) {
+  const isValid = db.isValidOwnershipToken(projectId, givenToken);
+  if (!isValid) {
     throw error(401, 'invalid ownership token');
   }
 };

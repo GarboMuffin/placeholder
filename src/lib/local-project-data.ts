@@ -1,10 +1,9 @@
 import {browser} from '$app/environment';
 
-const DATA_KEY = 'unshared:localProjectData';
+const DATA_KEY = 'unshared:localProjectData0';
 
 interface LocalProjectData {
   ownershipToken: string;
-  expires: number;
 }
 
 export function getLocalProjectData(): Record<string, LocalProjectData> {
@@ -27,14 +26,13 @@ export function getOwnershipToken(projectId: string): string | null {
   return localData ? localData.ownershipToken : null;
 }
 
-export function storeLocalProjectData(projectId: string, ownershipToken: string, expires: number): void {
+export function storeLocalProjectData(projectId: string, ownershipToken: string): void {
   if (!browser) {
     return;
   }
   const tokens = getLocalProjectData();
   tokens[projectId] = {
-    ownershipToken,
-    expires
+    ownershipToken
   };
   try {
     localStorage.setItem(DATA_KEY, JSON.stringify(tokens))

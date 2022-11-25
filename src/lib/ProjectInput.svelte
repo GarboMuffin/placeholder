@@ -93,12 +93,11 @@
 
 <script lang="ts">
   import { parseProject } from '$lib/parse';
-  import type { IncompleteProject } from "./server/db";
+  import type { IncompleteProject, AssetInformation } from "./server/db";
   import { storeLocalProjectData } from "./local-project-data";
 
   interface UploadedProject {
     projectId: string;
-    expires: number;
     ownershipToken: string;
   }
 
@@ -130,20 +129,25 @@
     const projectJSONData = await projectJSONFile.async('blob');
     const parsedProject = parseProject(await projectJSONData.text());
 
-    const md5extsToSha256: Record<string, string> = {};
+    const assetInformation: AssetInformation = {};
     for (const md5ext of parsedProject.md5exts) {
+      // TODO: handle when zip.file() === null
       const data = await zip.file(md5ext)!.async('arraybuffer');
       const sha256Buffer = await crypto.subtle.digest('SHA-256', data);
       const sha256Array = Array.from(new Uint8Array(sha256Buffer));
       const sha256 = sha256Array.map((b) => b.toString(16).padStart(2, '0')).join('');
-      md5extsToSha256[md5ext] = sha256;
+      const size = data.byteLength;
+      assetInformation[md5ext] = {
+        sha256,
+        size
+      };
     }
 
     progress = 0.1;
     progressText = 'Uploading project data';
     const newProjectBody = new FormData();
     newProjectBody.append('project', projectJSONData);
-    newProjectBody.append('md5exts', JSON.stringify(md5extsToSha256));
+    newProjectBody.append('assetInformation', JSON.stringify(assetInformation));
     newProjectBody.append('title', title);
     const incompleteProject: IncompleteProject = await (await fetch('/api/projects/new', {
       method: 'POST',
@@ -152,7 +156,6 @@
 
     const projectId = incompleteProject.projectId;
     const ownershipToken = incompleteProject.ownershipToken;
-    const expires = incompleteProject.expires;
     const missingMd5exts = incompleteProject.missingMd5exts;
 
     progressText = 'Uploading assets';
@@ -198,8 +201,7 @@
 
     return {
       projectId,
-      ownershipToken,
-      expires
+      ownershipToken
     };
   };
 
@@ -216,8 +218,7 @@
       uploadedProject = await uploadProject(file);
       storeLocalProjectData(
         uploadedProject.projectId,
-        uploadedProject.ownershipToken,
-        uploadedProject.expires
+        uploadedProject.ownershipToken
       );
     } catch (e) {
       console.error(e);

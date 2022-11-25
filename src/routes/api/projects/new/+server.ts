@@ -3,6 +3,37 @@ import type {RequestHandler} from './$types';
 import * as db from '$lib/server/db';
 import { parseProject } from '$lib/parse';
 import { getFileFromBody } from '$lib/server/utils';
+import type { AssetInformation } from '$lib/server/db';
+
+const isSHA256 = (str: unknown) => typeof str === 'string' && /^[a-f0-9]{64}$/.test(str);
+
+const isMd5ext = (str: unknown) => typeof str === 'string' && /^[a-f0-9]{32}\.[a-z0-9]{3}$/.test(str);
+
+const isObject = (object: unknown): object is object => (
+  !!object &&
+  !Array.isArray(object) &&
+  typeof object === 'object'
+);
+
+const isAssetInformation = (object: unknown): object is AssetInformation => {
+  if (!isObject(object)) {
+    return false;
+  }
+  for (const key of Object.keys(object)) {
+    if (!isMd5ext(key)) {
+      return false;
+    }
+    const asset = (object as any)[key] as unknown;
+    if (!isObject(asset)) {
+      return false;
+    }
+    const {sha256, size} = asset as any;
+    if (!isSHA256(sha256) || typeof size !== 'number') {
+      return false;
+    }
+  }
+  return true;
+};
 
 export const POST: RequestHandler = async ({request, url}) => {
   const body = await request.formData();
@@ -12,18 +43,16 @@ export const POST: RequestHandler = async ({request, url}) => {
   }
   const projectData = await projectDataFile.text();
 
-  const md5extsToSha256Text = body.get('md5exts');
-  if (typeof md5extsToSha256Text !== 'string') {
-    throw error(400, 'missing md5ext -> sha256 map');
+  const assetInformation = body.get('assetInformation');
+  if (typeof assetInformation !== 'string') {
+    throw error(400, 'missing asset information');
   }
-  const parsedMd5exts = JSON.parse(md5extsToSha256Text);
+  const parsedAssetInformation = JSON.parse(assetInformation) as unknown;
+  if (!isAssetInformation(parsedAssetInformation)) {
+    throw error(400, 'invalid asset information');
+  }
 
   const parsedProject = parseProject(projectData);
-  for (const md5ext of parsedProject.md5exts) {
-    if (typeof parsedMd5exts[md5ext] !== 'string') {
-      throw error(400, `missing md5ext: ${md5ext}`);
-    }
-  }
 
   const title = body.get('title');
   if (typeof title !== 'string') {
@@ -33,7 +62,7 @@ export const POST: RequestHandler = async ({request, url}) => {
   const incompleteProject = db.createIncompleteProject(
     Buffer.from(projectData),
     parsedProject,
-    parsedMd5exts,
+    parsedAssetInformation,
     title
   );
   return json(incompleteProject);
