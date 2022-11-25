@@ -11,6 +11,12 @@
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color-scheme: light dark;
   }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      background: #111;
+      color: #eee;
+    }
+  }
 
   .title {
     color: rgb(210, 0, 210);
