@@ -62,6 +62,9 @@
     const greenFlag = document.createElement('button');
     greenFlag.className = 'control-button';
     greenFlag.addEventListener('click', pressGreenFlag);
+    greenFlag.addEventListener('click', () => {
+      greenFlag.remove();
+    });
     const greenFlagIcon = document.createElement('img');
     greenFlagIcon.src = greenFlagSVG;
     greenFlag.appendChild(greenFlagIcon);
@@ -117,11 +120,16 @@
 
     const flagScreen = document.createElement('button');
     flagScreen.className = 'flag-screen';
-    const flagScreenIcon = document.createElement('img');
-    flagScreenIcon.className = 'flag-icon';
-    flagScreenIcon.src = greenFlagSVG;
-    flagScreen.appendChild(flagScreenIcon);
     flagScreen.addEventListener('click', pressGreenFlag);
+    flagScreen.addEventListener('click', () => {
+      flagScreen.remove();
+    });
+    const flagScreenIconOuter = document.createElement('div');
+    flagScreenIconOuter.className = 'flag-icon';
+    const flagScreenIcon = document.createElement('img');
+    flagScreenIcon.src = greenFlagSVG;
+    flagScreenIconOuter.appendChild(flagScreenIcon);
+    flagScreen.appendChild(flagScreenIconOuter);
     scaffolding._addLayer(flagScreen);
 
     await scaffolding.loadProject(projectData);
@@ -190,13 +198,6 @@
     border-radius: 0;
   }
 
-  .loading-screen, .error-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-
   :global(.flag-screen) {
     position: absolute;
     top: 0;
@@ -229,13 +230,16 @@
     box-sizing: border-box;
   }
 
-  .loading-screen {
+  .loading-screen, .error-screen {
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     background: black;
+    color: white;
+    flex-direction: column;
   }
+
   .loading-bar-outer {
     width: 200px;
     height: 10px;
@@ -248,12 +252,6 @@
     background: white;
   }
 
-  .error-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
   .error-title {
     font-size: 2em;
     margin: 0;

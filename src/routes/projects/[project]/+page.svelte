@@ -49,7 +49,7 @@
   };
 
   const deleteProject = async () => {
-    if (confirm('Are you sure you want to delete the project?')) {
+    if (confirm('Are you sure you want to delete the project? THIS CANNOT BE UNDONE.')) {
       const body = new FormData();
       body.set('ownershipToken', String(ownershipToken));
       const res = await fetchWithErrorHandling(`/api/projects/${projectId}`, {

@@ -11,6 +11,6 @@
 
 <main>
   <h1>Project Deleted</h1>
-  <p>If this was done by accident, unfortuantely we can't recover your project.</p>
+  <p>If this was done by accident, unfortunately we can't recover your project.</p>
   <p><a href="..">Go to the homepage</a></p>
 </main>
