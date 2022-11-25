@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import sqlite from 'better-sqlite3';
 import type {ParsedProject} from '$lib/parse';
 import nodeCrypto from 'node:crypto';
+import * as CONFIG from './config';
 
 /*
 
@@ -89,6 +90,17 @@ BEGIN
     NOT EXISTS (SELECT 1 FROM complete_project_assets WHERE asset_sha256=assets.asset_sha256);
 END;`);
 
+const _getTotalProjectDataSize = db.prepare('SELECT sum(length(data)) FROM projects;');
+const _getTotalCompleteAssetSize = db.prepare('SELECT sum(length(data)) FROM assets;');
+const _getTotalIncompleteAssetSize = db.prepare('SELECT sum(asset_size) FROM incomplete_project_assets;');
+const getTotalSizeOfEverything = () => {
+  return (
+    _getTotalProjectDataSize.get()['sum(length(data))'] +
+    _getTotalCompleteAssetSize.get()['sum(length(data))'] +
+    _getTotalIncompleteAssetSize.get()['sum(asset_size)']
+  );
+};
+
 export interface IncompleteProject {
   projectId: string;
   missingMd5exts: string[];
@@ -118,6 +130,10 @@ export const createIncompleteProject = db.transaction((
   assetInformation: AssetInformation,
   projectTitle: string
 ): IncompleteProject => {
+  if (encodedProjectJSON.byteLength > CONFIG.MAX_PROJECT_DATA_SIZE) {
+    throw error(400, 'project.json too large');
+  }
+
   const projectId = crypto.randomUUID();
   insertProjectStatement.run(
     projectId,
@@ -128,14 +144,36 @@ export const createIncompleteProject = db.transaction((
   const ownershipToken = createOwnershipToken(projectId);
 
   const missingMd5exts: string[] = [];
+  let totalSize = 0;
+
   for (const md5ext of parsedProject.md5exts) {
     const asset = assetInformation[md5ext];
-    if (isCompleteAsset(asset.sha256)) {
+
+    if (asset.size > CONFIG.MAX_ASSET_SIZE) {
+      throw error(400, `asset is too large: ${md5ext}`);
+    }
+
+    const completeAsset = getCompleteAssetMetadata(asset.sha256);
+    if (completeAsset) {
+      const knownSize = completeAsset.size;
+      if (asset.size !== knownSize) {
+        throw error(400, 'size of preexisting asset does not match');
+      }
       createCompleteAssetConnection(projectId, asset.sha256, md5ext);
     } else {
       missingMd5exts.push(md5ext);
       createIncompleteAssetConnection(projectId, asset.sha256, md5ext, asset.size);
     }
+
+    totalSize += asset.size;
+  }
+
+  if (totalSize > CONFIG.MAX_TOTAL_PROJECT_SIZE) {
+    throw error(400, 'total project size is too large');
+  }
+
+  if (getTotalSizeOfEverything() > CONFIG.MAX_EVERYTHING_SIZE) {
+    throw error(400, 'the server is out of space');
   }
 
   return {
@@ -154,12 +192,21 @@ const createOwnershipToken = (projectId: string): string => {
   return token;
 };
 
+interface CompleteAssetMetadata {
+  size: number;
+}
 const _isCompleteAsset = db.prepare(`
-  SELECT 1 FROM assets WHERE asset_sha256=?;
+  SELECT length(data) FROM assets WHERE asset_sha256=?;
 `)
-const isCompleteAsset = (sha256: string): boolean => {
+const getCompleteAssetMetadata = (sha256: string): CompleteAssetMetadata | null => {
   const result = _isCompleteAsset.get(sha256);
-  return !!result;
+  if (!result) {
+    return null;
+  }
+  const size = result['length(data)'];
+  return {
+    size
+  };
 };
 
 const _createCompleteAssetConnection = db.prepare(`
@@ -281,9 +328,12 @@ export const getMd5extToSha256 = (projectId: string): Record<string, string> => 
   return record;
 };
 
+const _doesProjectExist = db.prepare('SELECT 1 FROM projects WHERE project_id=? AND complete=TRUE;');
 const _getProjectData = db.prepare('SELECT data FROM projects WHERE project_id=?;');
 export const getProjectData = (projectId: string): Buffer => {
-  const _metadata = getCompleteProjectMetadata(projectId);
+  if (!_doesProjectExist.get(projectId)) {
+    throw error(404, 'project does not exist');
+  }
   const project = _getProjectData.get(projectId);
   return project.data;
 };
