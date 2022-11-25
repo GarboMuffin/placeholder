@@ -30,7 +30,15 @@ export const parseProject = (projectData: string): ParsedProject => {
   const md5exts = targets
     .map((target) => {
       const costumes = target.costumes;
+      if (!Array.isArray(costumes)) {
+        throw new Error('costumes is not an array');
+      }
+
       const sounds = target.sounds;
+      if (!Array.isArray(sounds)) {
+        throw new Error('sounds is not an array');
+      }
+
       return [...costumes, ...sounds];
     })
     .flat()
