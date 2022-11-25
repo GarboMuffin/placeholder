@@ -98,16 +98,14 @@
 </style>
 
 <div class="details">
-  {#if ownershipToken}
-    <input
-      class="title"
-      value={data.metadata.title}
-      on:change={editProjectTitle}
-      autocomplete="off"
-    >
-  {:else}
-    <h1 class="title">{data.metadata.title}</h1>
-  {/if}
+  <input
+    class="title"
+    value={data.metadata.title}
+    placeholder="Untitled"
+    on:change={editProjectTitle}
+    autocomplete="off"
+    readonly={!ownershipToken}
+  >
 </div>
 
 <div
@@ -141,16 +139,14 @@
 </div>
 
 <div class="details">
-  {#if ownershipToken}
-    <textarea
-      class="description"
-      value={data.metadata.description}
-      on:change={editProjectDescription}
-      autocomplete="off"
-    ></textarea>
-  {:else}
-    <p class="description">{data.metadata.description}</p>
-  {/if}
+  <textarea
+    class="description"
+    value={data.metadata.description}
+    placeholder="No description"
+    on:change={editProjectDescription}
+    autocomplete="off"
+    readonly={!ownershipToken}
+  ></textarea>
 
   <p>During the early prototype period, projects will be deleted at random.</p>
 
@@ -175,7 +171,6 @@
   const projectId = $page.params.project;
   const ownershipToken = getOwnershipToken(projectId);
   let projectTitle = data.metadata.title;
-  let projectDescription = data.metadata.description;
 
   let progress = 0;
 
