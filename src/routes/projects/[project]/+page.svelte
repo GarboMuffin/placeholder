@@ -4,6 +4,7 @@
   import {getOwnershipToken} from '$lib/local-project-data';
   import { APP_NAME } from '$lib/brand';
   import ProjectRunner from '$lib/ProjectRunner.svelte';
+  import { fetchWithErrorHandling } from '$lib/fetch';
 
   export let data: PageData;
 
@@ -11,11 +12,25 @@
   const ownershipToken = getOwnershipToken(projectId);
   let projectTitle = data.metadata.title;
 
+  let vm: any;
+
+  const downloadProject = async () => {
+    const blob = await vm.saveProjectSb3();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${projectTitle}.sb3`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const editProjectDescription = async (e: Event) => {
     const body = new FormData();
     body.set('ownershipToken', String(ownershipToken));
     body.set('description', (e.target as HTMLTextAreaElement).value);
-    const res = await fetch(`/api/projects/${projectId}`, {
+    const res = await fetchWithErrorHandling(`/api/projects/${projectId}`, {
       method: 'POST',
       body
     });
@@ -27,7 +42,7 @@
     const newTitle = (e.target as HTMLInputElement).value;
     projectTitle = newTitle;
     body.set('title', newTitle);
-    const res = await fetch(`/api/projects/${projectId}`, {
+    const res = await fetchWithErrorHandling(`/api/projects/${projectId}`, {
       method: 'POST',
       body
     });
@@ -37,10 +52,11 @@
     if (confirm('Are you sure you want to delete the project?')) {
       const body = new FormData();
       body.set('ownershipToken', String(ownershipToken));
-      const res = await fetch(`/api/projects/${projectId}`, {
+      const res = await fetchWithErrorHandling(`/api/projects/${projectId}`, {
         method: 'DELETE',
         body
       });
+      location.href = '/deleted';
     }
   };
 </script>
@@ -61,7 +77,7 @@
     font-size: 2em;
     background: none;
     padding: 0;
-    margin: 16px 0;
+    margin: 1rem 0;
     border: none;
     width: 100%;
     font-weight: bold;
@@ -77,9 +93,9 @@
     max-width: 100%;
     min-width: 100%;
     min-height: 100px;
-    padding: 8px;
-    border-radius: 8px;
-    margin: 16px 0;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    margin: 1em 0;
     box-sizing: border-box;
     border: 1px solid #b9d6ff;
     background-color: #dbebff;
@@ -106,6 +122,7 @@
 <ProjectRunner
   projectId={projectId}
   md5extsToSha256={data.md5extsToSha256}
+  bind:vm={vm}
 />
 
 <div class="details">
@@ -119,6 +136,10 @@
   ></textarea>
 
   <p>During the early prototype period, projects will be deleted at random.</p>
+
+  <p>
+    <button class="download" on:click={downloadProject}>Download project</button>
+  </p>
 
   {#if ownershipToken}
     <div class="owner-section">
