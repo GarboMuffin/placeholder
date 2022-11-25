@@ -26,6 +26,7 @@
   .fancy {
     font-weight: bold;
     -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
     background-clip: text;
     background-image: linear-gradient(to right, #a31aff, #e44cff);
   }
