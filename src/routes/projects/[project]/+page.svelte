@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>{projectTitle} - {APP_NAME}</title>
+  <title>{projectTitle || 'Untitled'} - {APP_NAME}</title>
 </svelte:head>
 
 <style>
