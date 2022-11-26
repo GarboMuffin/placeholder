@@ -30,10 +30,14 @@
     const body = new FormData();
     body.set('ownershipToken', String(ownershipToken));
     body.set('description', (e.target as HTMLTextAreaElement).value);
-    const res = await fetchWithErrorHandling(`/api/projects/${projectId}`, {
-      method: 'POST',
-      body
-    });
+    try {
+      await fetchWithErrorHandling(`/api/projects/${projectId}`, {
+        method: 'POST',
+        body
+      });
+    } catch (e) {
+      alert(e);
+    }
   };
 
   const editProjectTitle = async (e: Event) => {
@@ -42,21 +46,29 @@
     const newTitle = (e.target as HTMLInputElement).value;
     projectTitle = newTitle;
     body.set('title', newTitle);
-    const res = await fetchWithErrorHandling(`/api/projects/${projectId}`, {
-      method: 'POST',
-      body
-    });
+    try {
+      await fetchWithErrorHandling(`/api/projects/${projectId}`, {
+        method: 'POST',
+        body
+      });
+    } catch (e) {
+      alert(e);
+    }
   };
 
   const deleteProject = async () => {
     if (confirm('Are you sure you want to delete the project? THIS CANNOT BE UNDONE.')) {
       const body = new FormData();
       body.set('ownershipToken', String(ownershipToken));
-      const res = await fetchWithErrorHandling(`/api/projects/${projectId}`, {
-        method: 'DELETE',
-        body
-      });
-      location.href = '/deleted';
+      try {
+        await fetchWithErrorHandling(`/api/projects/${projectId}`, {
+          method: 'DELETE',
+          body
+        });
+        location.href = '/deleted';
+      } catch (e) {
+        alert(e);
+      }
     }
   };
 </script>
