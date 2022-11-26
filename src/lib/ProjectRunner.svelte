@@ -63,7 +63,7 @@
     greenFlag.className = 'control-button';
     greenFlag.addEventListener('click', pressGreenFlag);
     greenFlag.addEventListener('click', () => {
-      greenFlag.remove();
+      flagScreen.remove();
     });
     const greenFlagIcon = document.createElement('img');
     greenFlagIcon.src = greenFlagSVG;
