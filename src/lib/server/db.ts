@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import sqlite from 'better-sqlite3';
 import type {ParsedProject} from '$lib/parse';
 import nodeCrypto from 'node:crypto';
-import * as CONFIG from './config';
+import * as Limits from '../config/limits';
 
 /*
 
@@ -130,7 +130,7 @@ export const createIncompleteProject = db.transaction((
   assetInformation: AssetInformation,
   projectTitle: string
 ): IncompleteProject => {
-  if (encodedProjectJSON.byteLength > CONFIG.MAX_PROJECT_DATA_SIZE) {
+  if (encodedProjectJSON.byteLength > Limits.MAX_PROJECT_DATA_SIZE) {
     throw error(400, 'project.json too large');
   }
 
@@ -149,7 +149,7 @@ export const createIncompleteProject = db.transaction((
   for (const md5ext of parsedProject.md5exts) {
     const asset = assetInformation[md5ext];
 
-    if (asset.size > CONFIG.MAX_ASSET_SIZE) {
+    if (asset.size > Limits.MAX_ASSET_SIZE) {
       throw error(400, `asset is too large: ${md5ext}`);
     }
 
@@ -168,11 +168,11 @@ export const createIncompleteProject = db.transaction((
     totalSize += asset.size;
   }
 
-  if (totalSize > CONFIG.MAX_TOTAL_PROJECT_SIZE) {
+  if (totalSize > Limits.MAX_TOTAL_PROJECT_SIZE) {
     throw error(400, 'total project size is too large');
   }
 
-  if (getTotalSizeOfEverything() > CONFIG.MAX_EVERYTHING_SIZE) {
+  if (getTotalSizeOfEverything() > Limits.MAX_EVERYTHING_SIZE) {
     throw error(400, 'the server is out of space');
   }
 

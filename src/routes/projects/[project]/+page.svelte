@@ -2,7 +2,7 @@
   import type {PageData} from './$types';
   import {page} from '$app/stores';
   import {getOwnershipToken} from '$lib/local-project-data';
-  import { APP_NAME } from '$lib/brand';
+  import { APP_NAME } from '$lib/config/brand';
   import ProjectRunner from '$lib/ProjectRunner.svelte';
   import { fetchWithErrorHandling } from '$lib/fetch';
 

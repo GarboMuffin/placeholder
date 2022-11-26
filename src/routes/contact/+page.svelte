@@ -1,5 +1,5 @@
 <script>
-  import { CONTACT } from "$lib/brand";
+  import { CONTACT } from "$lib/config/brand";
 </script>
 
 <svelte:head>

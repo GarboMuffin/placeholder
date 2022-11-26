@@ -1,5 +1,5 @@
 <script>
-  import { APP_NAME } from '$lib/brand';
+  import { APP_NAME } from '$lib/config/brand';
 </script>
 
 <style>

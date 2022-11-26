@@ -15,9 +15,9 @@ export const MAX_ASSET_SIZE = 10 * MB;
 /**
  * Maximum total size of all the assets inside a project including project.json in bytes.
  */
-export const MAX_TOTAL_PROJECT_SIZE = 1 * GB;
+export const MAX_TOTAL_PROJECT_SIZE = 500 * MB;
 
 /**
  * Maximum total size of all assets and projects in the database.
  */
-export const MAX_EVERYTHING_SIZE = 20 * GB;
+export const MAX_EVERYTHING_SIZE = 30 * GB;
