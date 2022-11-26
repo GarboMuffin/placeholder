@@ -8,9 +8,13 @@
 
   export let data: PageData;
 
+  const DEFAULT_TITlE = 'Untitled';
+  const DEFAULT_DESCRIPTION = 'No description';
+
   const projectId = $page.params.project;
   const ownershipToken = getOwnershipToken(projectId);
   let projectTitle = data.metadata.title;
+  let projectDescription = data.metadata.description;
 
   let vm: any;
 
@@ -74,7 +78,12 @@
 </script>
 
 <svelte:head>
-  <title>{projectTitle || 'Untitled'} - {APP_NAME}</title>
+  <title>{projectTitle || DEFAULT_TITlE} - {APP_NAME}</title>
+  <meta name="robots" content="noindex">
+  <meta name="description" content={projectDescription || DEFAULT_DESCRIPTION}>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content={projectTitle || DEFAULT_TITlE}>
+  <meta property="og:description" content={projectDescription || DEFAULT_DESCRIPTION}>
 </svelte:head>
 
 <style>
@@ -124,7 +133,7 @@
   <input
     class="title"
     value={data.metadata.title}
-    placeholder="Untitled"
+    placeholder={DEFAULT_TITlE}
     on:change={editProjectTitle}
     autocomplete="off"
     readonly={!ownershipToken}
@@ -140,8 +149,8 @@
 <div class="details">
   <textarea
     class="description"
-    value={data.metadata.description}
-    placeholder="No description"
+    value={projectDescription}
+    placeholder={DEFAULT_DESCRIPTION}
     on:change={editProjectDescription}
     autocomplete="off"
     readonly={!ownershipToken}
