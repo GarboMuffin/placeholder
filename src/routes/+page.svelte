@@ -46,7 +46,7 @@
 
 <section class="header">
   <h1>Welcome to <span class="fancy">{APP_NAME}.</span></h1>
-  <p class="warning">This site is experimental and is in active development. Projects will be deleted at random. Do not rely on this too much. Please <a href="https://github.com/GarboMuffin/unshared/issues/new">report bugs</a>.</p>
+  <p class="warning">This site is experimental and is in active development. Projects will be deleted at random. Do not rely on this too much. Please <a href="https://github.com/GarboMuffin/placeholder/issues/new">report bugs</a>.</p>
   <p>Select or drop a .sb3 file and we'll create a temporary link that anyone can use to view the project.</p>
   <p>By uploading a project, you assert that you have the necesssary legal rights to allow us to store and redistribute the project and its assets.</p>
 </section>
