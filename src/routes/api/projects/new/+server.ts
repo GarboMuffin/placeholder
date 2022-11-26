@@ -5,6 +5,7 @@ import { parseProject } from '$lib/parse';
 import { getFileFromBody } from '$lib/server/utils';
 import type { AssetInformation } from '$lib/server/db';
 import { isNaughty } from '$lib/naughty';
+import { MAX_TITLE_LENGTH } from '$lib/config/limits';
 
 const isSHA256 = (str: unknown) => typeof str === 'string' && /^[a-f0-9]{64}$/.test(str);
 
@@ -59,7 +60,7 @@ export const POST: RequestHandler = async ({request, url}) => {
   if (typeof title !== 'string') {
     throw error(400, 'invalid or missing title');
   }
-  if (isNaughty(title)) {
+  if (isNaughty(title) || title.length > MAX_TITLE_LENGTH) {
     title = 'Project';
   }
 

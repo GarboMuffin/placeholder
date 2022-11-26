@@ -21,3 +21,13 @@ export const MAX_TOTAL_PROJECT_SIZE = 500 * MB;
  * Maximum total size of all assets and projects in the database.
  */
 export const MAX_EVERYTHING_SIZE = 30 * GB;
+
+/**
+ * Maximum length of project titles.
+ */
+export const MAX_TITLE_LENGTH = 100;
+
+/**
+ * Maximum length of project descriptions.
+ */
+export const MAX_DESCRIPTION_LENGTH = 10000;
