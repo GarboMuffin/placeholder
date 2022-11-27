@@ -295,7 +295,7 @@ const _isValidOwnershipToken = db.prepare(`
   SELECT 1 FROM ownership_tokens WHERE project_id=? AND ownership_token=?;
 `)
 export const isValidOwnershipToken = (projectId: string, ownershipToken: string): boolean => {
-  return !!_isValidOwnershipToken.run(projectId, ownershipToken);
+  return !!_isValidOwnershipToken.get(projectId, ownershipToken);
 };
 
 interface ProjectMetadata {
