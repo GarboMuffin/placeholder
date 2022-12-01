@@ -41,6 +41,20 @@
     scaffolding.appendTo(scaffoldingElement);
     progress = 0.2;
 
+    scaffolding.setExtensionSecurityManager({
+      getSandboxMode: (extension: string) => {
+        if (extension.startsWith('https://extensions.turbowarp.org/')) return 'unsandboxed';
+        return 'iframe';
+      },
+      canLoadExtensionFromProject: (extension: string) => {
+        // Other sandbox modes don't work yet and we don't want completely untrusted JS running
+        if (extension.startsWith('https://extensions.turbowarp.org/')) {
+          return true;
+        }
+        throw new Error(`Loading extensions from places other than extensions.turbowarp.org not supported yet: ${extension}`);
+      }
+    });
+
     vm = scaffolding.vm;
 
     const storage = scaffolding.storage;

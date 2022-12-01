@@ -80,7 +80,6 @@
     <li>Addons</li>
     <li>Editing uploaded projects</li>
     <li>Cloud variables</li>
-    <li>Custom extensions including unsandboxed ones</li>
   </ul>
 
   <h2>Where is the source code?</h2>
