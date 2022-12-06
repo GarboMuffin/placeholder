@@ -1,3 +1,3 @@
 # Placeholder
 
-Placeholder is an experimental platform for ephmeral Scratch project sharing.
+Placeholder is an experimental platform for ephemeral Scratch project sharing.
