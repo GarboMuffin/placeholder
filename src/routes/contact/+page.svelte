@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>Contact</title>
+  <title>Contact Us</title>
 </svelte:head>
 
 <style>
@@ -14,6 +14,7 @@
 </style>
 
 <main>
-  <h1>Contact</h1>
-  <p>Email us: {CONTACT}</p>  
+  <h1>Contact Us</h1>
+  <p>Email us: {CONTACT}</p>
+  <p>For DMCA requests, please include links to the relevant project(s).</p>
 </main>

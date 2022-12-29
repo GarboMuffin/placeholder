@@ -265,7 +265,7 @@
   <div class="uploaded-project">
     <p>Success! Your project was uploaded. Here is your link:</p>
     <p><a data-sveltekit-reload href={projectURL}>{projectURL}</a></p>
-    <p><b>During the early prototype period, all projects will be deleted randomly.</b></p>
+    <p><b>Projects may be deleted randomly.</b></p>
     <p>Only you will be able to edit the project's information.</p>
   </div>
 {/if}

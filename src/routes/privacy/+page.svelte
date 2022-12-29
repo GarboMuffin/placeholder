@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Privacy</title>
+  <title>Privacy Policy</title>
 </svelte:head>
 
 <style>
@@ -10,7 +10,9 @@
 </style>
 
 <main>
-  <h1>Privacy</h1>
-  <p>During the current prototype period, assume that any and all requests, IP addresses, and other browser metadata is being logged and is being monitored.</p>
-  <p>This data will be removed when we exit the prototype period.</p>
+  <h1>Privacy Policy</h1>
+  <p>During the experimental period, assume that any and all requests, IP addresses, and other browser metadata is being logged. This data will be removed later.</p>
+  <p>Uploaded projects and assets are stored unencrypted in the United States of America.</p>
+  <p>This document may change at any time without warning.</p>
+  <p>For concerns related to privacy or any other matter, see <a href="/contact">contact</a>.</p>
 </main>

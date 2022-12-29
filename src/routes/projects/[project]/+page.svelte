@@ -194,8 +194,6 @@
     readonly={!ownershipToken}
   ></textarea>
 
-  <p>During the early prototype period, projects will be deleted at random.</p>
-
   <p>
     <button class="download" on:click={downloadProject}>Download project</button>
   </p>
