@@ -238,6 +238,23 @@
   a:active {
     color: red;
   }
+
+  .progress-outer {
+    width: 200px;
+    height: 8px;
+    border: 1px solid black;
+    background-color: black;
+  }
+  .progress-inner {
+    width: 0;
+    height: 100%;
+    background-color: white;
+  }
+  @media (prefers-color-scheme: dark) {
+    .progress-outer {
+      border-color: white;
+    }
+  }
 </style>
 
 <label class="outer" class:dropping={isDropping} class:uploading={isUploading}>
@@ -254,7 +271,9 @@
   {#if isUploading}
     <div>
       <div>{progressText}</div>
-      <progress value={progress} />
+      <div class="progress-outer">
+        <div class="progress-inner" style:width={`${progress * 100}%`}></div>
+      </div>
     </div>
   {:else}
     <div class="label">Select or drop .sb3 file</div>
