@@ -3,6 +3,7 @@
   import type { IncompleteProject, AssetInformation } from "./server/db";
   import { storeLocalProjectData } from "./local-project-data";
   import { fetchWithErrorHandling } from './fetch';
+  import createLimiter from './async-limiter';
 
   interface UploadedProject {
     projectId: string;
@@ -96,7 +97,10 @@
       uploadedAssets++;
       progress = 0.2 + (uploadedAssets / totalAssetsToUpload) * 0.8;
     };
-    await Promise.all(incompleteProject.missingMd5exts.map(uploadAsset));
+    // Browsers tend to throw errors if we try to send too many requests at once, so we throttle them a
+    // little bit.
+    const throttledUploadAsset = createLimiter(uploadAsset, 25);
+    await Promise.all(incompleteProject.missingMd5exts.map(throttledUploadAsset));
 
     progress = 1;
     progressText = 'Finalizing';
