@@ -90,6 +90,24 @@ BEGIN
     NOT EXISTS (SELECT 1 FROM complete_project_assets WHERE asset_sha256=assets.asset_sha256);
 END;`);
 
+// TODO: I would not be surprised if this is susceptible to timing attacks
+db.exec(`
+CREATE TABLE IF NOT EXISTS admin_tokens (
+  secret_token TEXT PRIMARY KEY NOT NULL,
+
+  -- name is just a more memorable description; this isn't used for security
+  name TEXT NOT NULL
+) STRICT;
+`);
+
+db.exec(`
+CREATE TABLE IF NOT EXISTS admin_project_reports (
+  report_id INTEGER PRIMARY KEY NOT NULL,
+  report_body TEXT NOT NULL,
+  project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE
+) STRICT;
+`);
+
 const _getTotalProjectDataSize = db.prepare('SELECT sum(length(data)) FROM projects;');
 const _getTotalCompleteAssetSize = db.prepare('SELECT sum(length(data)) FROM assets;');
 const _getTotalIncompleteAssetSize = db.prepare('SELECT sum(asset_size) FROM incomplete_project_assets;');
@@ -114,6 +132,14 @@ export type AssetInformation = Record<string, {
   sha256: string;
   size: number;
 }>;
+
+export interface Report {
+  reportId: number;
+  reportBody: string;
+  projectId: string;
+  projectTitle: string;
+  projectDescription: string;
+}
 
 const insertProjectStatement = db.prepare(`
   INSERT INTO projects (
@@ -190,6 +216,16 @@ const createOwnershipToken = (projectId: string): string => {
   const token = crypto.randomUUID();
   _insertOwnershipToken.run(token, projectId);
   return token;
+};
+
+const _getAnyOwnershipToken = db.prepare(`SELECT ownership_token FROM ownership_tokens WHERE project_id=?;`);
+export const getAdminOwnershipToken = (projectId: string): string | null => {
+  // For now we'll just use the the first token, which is guaranteed to always exist.
+  const result = _getAnyOwnershipToken.get(projectId);
+  if (!result) {
+    return null;
+  }
+  return result.ownership_token;
 };
 
 interface CompleteAssetMetadata {
@@ -361,3 +397,48 @@ const _deleteProject = db.prepare(`DELETE FROM projects WHERE project_id=?;`);
 export const deleteProject = (projectId: string): void => {
   _deleteProject.run(projectId);
 };
+
+const _createAdminToken = db.prepare(`INSERT INTO admin_tokens (secret_token, name) VALUES (?, ?);`);
+export const createAdminToken = (name: string): string => {
+  const secretToken = crypto.randomUUID();
+  _createAdminToken.run(secretToken, name);
+  return secretToken;
+};
+
+const _validateAdminToken = db.prepare(`SELECT 1 FROM admin_tokens WHERE secret_token=?;`);
+export const isValidAdminToken = (secretToken: string): boolean => {
+  return !!_validateAdminToken.get(secretToken);
+};
+
+const _createReport = db.prepare(`INSERT INTO admin_project_reports (project_id, report_body) VALUES (?, ?);`);
+export const createReport = (projectId: string, reportBody: string): void => {
+  _createReport.run(projectId, reportBody);
+};
+
+const _deleteReport = db.prepare(`DELETE FROM admin_project_reports WHERE report_id=?;`);
+export const deleteReport = (reportId: number): void => {
+  _deleteReport.run(reportId);
+};
+
+const _getAllReports = db.prepare(`
+  SELECT
+    report_id,
+    project_id,
+    report_body,
+    project_title,
+    project_description
+  FROM admin_project_reports INNER JOIN projects USING(project_id);
+`);
+export const getAllReports = (): Report[] => {
+  return _getAllReports.all().map(response => ({
+    reportId: response.report_id,
+    projectId: response.project_id,
+    reportBody: response.report_body,
+    projectTitle: response.project_title,
+    projectDescription: response.project_description,
+  }));
+};
+
+// TODO: this is a temporary hack
+// document.cookie = "adminToken=abcdef-123456;path=/;max-age=31536000;secure;SameSite=lax";
+console.log(`New admin token: ${createAdminToken(`automatically generated ${Date.now()}`)}`);

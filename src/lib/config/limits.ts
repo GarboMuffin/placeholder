@@ -31,3 +31,8 @@ export const MAX_TITLE_LENGTH = 100;
  * Maximum length of project descriptions.
  */
 export const MAX_DESCRIPTION_LENGTH = 10000;
+
+/**
+ * Maximum length of report bodies.
+ */
+export const MAX_REPORT_BODY_LENGTH = 10000;

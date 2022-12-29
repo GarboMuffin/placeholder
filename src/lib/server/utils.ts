@@ -19,3 +19,13 @@ export const getFileFromBody = (formData: FormData, filename: string): File | nu
   }
   return file;
 };
+
+export const validateAdminPermissions = (secretToken: unknown): void => {
+  if (typeof secretToken !== 'string') {
+    throw error(401, 'admin token missing or invalid type');
+  }
+
+  if (!db.isValidAdminToken(secretToken)) {
+    throw error(401, 'invalid admin token');
+  }
+};

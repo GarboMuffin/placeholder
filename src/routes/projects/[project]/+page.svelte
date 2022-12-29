@@ -12,7 +12,8 @@
   const DEFAULT_DESCRIPTION = 'No description';
 
   const projectId = $page.params.project;
-  const ownershipToken = getOwnershipToken(projectId);
+  const ownershipToken = data.adminOwnershipToken || getOwnershipToken(projectId);
+  const canEditProject = !!ownershipToken;
   let projectTitle = data.metadata.title;
   let projectDescription = data.metadata.description;
 
@@ -75,6 +76,34 @@
       }
     }
   };
+
+  let reportBody: string = '';
+  let submittingReport: boolean = false;
+  let submittedReport: boolean = false;
+  const submitReport = async () => {
+    submittingReport = true;
+
+    const body = new FormData();
+    body.set('projectId', projectId);
+    body.set('body', reportBody);
+
+    try {
+      await fetchWithErrorHandling(`/api/projects/${projectId}/report`, {
+        method: 'POST',
+        body
+      });
+
+      alert([
+        'A report has been submitted and will be reviewed by a volunteer. Thank you.\n\n',
+        'Reporting a project multiple times does not change its place in the queue.'
+      ].join(''));
+      submittedReport = true;
+    } catch (e) {
+      alert(e);
+    }
+
+    submittingReport = false;
+  };
 </script>
 
 <svelte:head>
@@ -127,6 +156,15 @@
       background-color: #184677;
     }
   }
+
+  .report summary {
+    cursor: pointer;
+  }
+  .report textarea {
+    width: 100%;
+    height: 100px;
+    box-sizing: border-box;
+  }
 </style>
 
 <div class="details">
@@ -162,7 +200,25 @@
     <button class="download" on:click={downloadProject}>Download project</button>
   </p>
 
-  {#if ownershipToken}
+  <details class="report">
+    <summary>Report this project</summary>
+    <p>
+      <textarea
+        bind:value={reportBody}
+        placeholder="Explain why this project should be removed. Please be comprehensive. We won't be able to reach out for more information."
+        readonly={submittingReport}
+      ></textarea>
+    </p>
+    <p>
+      <button
+        class="submit-report"
+        on:click={submitReport}
+        disabled={submittingReport}
+      >Submit report</button>
+    </p>
+  </details>
+
+  {#if canEditProject}
     <div class="owner-section">
       <p>
         <button on:click={deleteProject}>Delete this project</button>
