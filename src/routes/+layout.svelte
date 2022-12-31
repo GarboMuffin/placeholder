@@ -2,6 +2,10 @@
   import { APP_NAME } from '$lib/config/brand';
 </script>
 
+<svelte:head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</svelte:head>
+
 <style>
   :global(body) {
     margin: 0;
