@@ -181,6 +181,7 @@
 <ProjectRunner
   projectId={projectId}
   md5extsToSha256={data.md5extsToSha256}
+  cloudHost="wss://cirrus.turbowarp.org"
   bind:vm={vm}
 />
 

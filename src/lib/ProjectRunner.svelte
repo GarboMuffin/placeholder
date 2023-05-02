@@ -8,6 +8,7 @@
 
   export let projectId: string;
   export let md5extsToSha256: Record<string, string>;
+  export let cloudHost: string;
 
   let progress = 0;
 
@@ -56,6 +57,10 @@
     });
 
     scaffolding.setUsername("player####".replace(/#/g, () => String(Math.floor(Math.random() * 10))));
+
+    if (cloudHost) {
+      scaffolding.addCloudProvider(new Scaffolding.Cloud.WebSocketProvider(cloudHost, projectId));
+    }
 
     vm = scaffolding.vm;
 
