@@ -80,12 +80,17 @@
   <h2>How large can projects be?</h2>
   <p>Similar limits to Scratch. The limits will be adjusted over time.</p>
 
+  <h2>Do cloud variables work?</h2>
+  <p>Yes.</p>
+
+  <h2>Do custom extensions work?</h2>
+  <p>Most extensions on <a href="https://extensions.turbowarp.org/">extensions.turbowarp.org</a> will work.</p>
+
   <h2>Notable missing features that will be added eventually</h2>
   <ul>
     <li>Built-in editor</li>
     <li>Addons</li>
     <li>Editing uploaded projects</li>
-    <li>Cloud variables</li>
   </ul>
 
   <h2>Where is the source code?</h2>
