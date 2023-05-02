@@ -55,6 +55,8 @@
       }
     });
 
+    scaffolding.setUsername("player####".replace(/#/g, () => String(Math.floor(Math.random() * 10))));
+
     vm = scaffolding.vm;
 
     const storage = scaffolding.storage;
