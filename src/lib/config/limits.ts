@@ -5,7 +5,7 @@ const GB = 1000 * MB;
 /**
  * Maximum size of project.json in bytes.
  */
-export const MAX_PROJECT_DATA_SIZE = 5 * MB;
+export const MAX_PROJECT_DATA_SIZE = 5.5 * MB;
 
 /**
  * Maximum size of each individual asset in bytes.
