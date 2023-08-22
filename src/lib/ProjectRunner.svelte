@@ -81,7 +81,7 @@
     };
 
     const greenFlag = document.createElement('button');
-    greenFlag.className = 'control-button';
+    greenFlag.className = 'control-button green-flag-button';
     greenFlag.addEventListener('click', pressGreenFlag);
     greenFlag.addEventListener('click', () => {
       flagScreen.remove();
@@ -104,7 +104,7 @@
     });
 
     const stopAll = document.createElement('button');
-    stopAll.className = 'control-button';
+    stopAll.className = 'control-button stop-all-button';
     stopAll.addEventListener('click', pressStopAll);
     const stopAllIcon = document.createElement('img');
     stopAllIcon.src = stopButtonSVG;
