@@ -27,8 +27,5 @@
 	"dependencies": {
 		"better-sqlite3": "^9.2.2",
 		"jszip": "^3.10.1"
-	},
-	"volta": {
-		"node": "18.12.1"
 	}
 }
