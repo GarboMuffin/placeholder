@@ -14,7 +14,7 @@
 		"@sveltejs/adapter-node": "^1.0.0-next.101",
 		"@sveltejs/kit": "^1.15.2",
 		"@turbowarp/packager": "^1.9.2",
-		"@types/better-sqlite3": "^7.6.2",
+		"@types/better-sqlite3": "^7.6.8",
 		"svelte": "^3.44.0",
 		"svelte-check": "^2.7.1",
 		"svelte-preprocess": "^4.10.6",
@@ -25,7 +25,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"better-sqlite3": "^7.6.2",
+		"better-sqlite3": "^9.2.2",
 		"jszip": "^3.10.1"
 	},
 	"volta": {
