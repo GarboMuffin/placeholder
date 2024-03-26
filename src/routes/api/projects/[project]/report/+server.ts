@@ -21,6 +21,24 @@ export const POST: RequestHandler = async ({request}) => {
 
   db.createReport(projectId, reportBody);
 
+  if (process.env.REPORT_WEBHOOK) {
+    let body = '';
+    body += `Someone made a report about https://share.turbowarp.org/projects/${projectId} with reason:\n`;
+    body += `\`\`\`\n${reportBody.replace(/```/g, '')}\n\`\`\`\n`;
+    body += '<https://share.turbowarp.org/admin/reports>';
+    fetch(process.env.REPORT_WEBHOOK, {
+      method: 'POST',
+      body: JSON.stringify({
+        content: body
+      }),
+      headers: {
+        'content-type': 'application/json'
+      }
+    }).then(r => {
+      console.log('webhook status', r.status);
+    });
+  }
+
   // No reason to respond with anything such as the report's ID.
   return new Response('ok');
 };
