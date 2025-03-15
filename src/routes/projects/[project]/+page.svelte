@@ -81,6 +81,11 @@
   let submittingReport: boolean = false;
   let submittedReport: boolean = false;
   const submitReport = async () => {
+    if (reportBody.length < 20) {
+      alert('Your reason for reporting is too short. Please add additional explanation.');
+      return;
+    }
+
     submittingReport = true;
 
     const body = new FormData();
@@ -201,6 +206,9 @@
 
   <details class="report">
     <summary>Report this project</summary>
+    <p>
+      All reports are reviewed by a real human volunteer. Help us review reports quickly by not wasting our time.
+    </p>
     <p>
       <textarea
         bind:value={reportBody}
