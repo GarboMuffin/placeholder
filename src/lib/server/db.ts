@@ -438,7 +438,3 @@ export const getAllReports = (): Report[] => {
     projectDescription: response.project_description,
   }));
 };
-
-// TODO: this is a temporary hack
-// document.cookie = "adminToken=abcdef-123456;path=/;max-age=31536000;secure;SameSite=lax";
-console.log(`New admin token: ${createAdminToken(`automatically generated ${Date.now()}`)}`);
