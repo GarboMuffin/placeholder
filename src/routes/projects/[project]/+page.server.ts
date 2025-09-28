@@ -14,6 +14,8 @@ export const load: PageServerLoad = ({params, cookies}) => {
     }
   }
 
+  db.markProjectAsVisited(params.project);
+
   return {
     metadata: projectMetadata,
     md5extsToSha256,

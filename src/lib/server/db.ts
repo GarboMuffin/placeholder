@@ -20,6 +20,14 @@ const db = new sqlite(process.env.TEST ? ':memory:' : 'unshared.db');
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+/*
+  BEGIN TRANSACTION;
+  ALTER TABLE projects ADD COLUMN created_at INTEGER NOT NULL;
+  ALTER TABLE projects ADD COLUMN last_visited_at INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE projects ADD COLUMN last_loaded_at INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE projects ADD COLUMN last_started_at INTEGER NOT NULL DEFAULT 0;
+  COMMIT;
+*/
 db.exec(`
 CREATE TABLE IF NOT EXISTS projects (
   -- unique ID for project, visible to user
@@ -32,7 +40,12 @@ CREATE TABLE IF NOT EXISTS projects (
   data BLOB NOT NULL,
 
   project_title TEXT NOT NULL,
-  project_description TEXT NOT NULL
+  project_description TEXT NOT NULL,
+
+  created_at INTEGER NOT NULL,
+  last_visited_at INTEGER NOT NULL DEFAULT 0,
+  last_loaded_at INTEGER NOT NULL DEFAULT 0,
+  last_started_at INTEGER NOT NULL DEFAULT 0
 ) STRICT;`);
 
 db.exec(`
@@ -147,8 +160,16 @@ const insertProjectStatement = db.prepare(`
     complete,
     data,
     project_title,
-    project_description
-  ) VALUES (?, FALSE, ?, ?, '');
+    project_description,
+    created_at
+  ) VALUES (
+    ?,
+    FALSE,
+    ?,
+    ?,
+    '',
+    strftime('%s', 'now')
+  );
 `);
 export const createIncompleteProject = db.transaction((
   encodedProjectJSON: Buffer,
@@ -437,4 +458,19 @@ export const getAllReports = (): Report[] => {
     projectTitle: response.project_title,
     projectDescription: response.project_description,
   }));
+};
+
+const _markProjectAsVisited = db.prepare(`UPDATE projects SET last_visited_at = strftime('%s', 'now') WHERE project_id=?;`);
+export const markProjectAsVisited = (projectId: string) => {
+  _markProjectAsVisited.run(projectId);
+};
+
+const _markProjectAsLoaded = db.prepare(`UPDATE projects SET last_loaded_at = strftime('%s', 'now') WHERE project_id=?;`);
+export const markProjectAsLoaded = (projectId: string) => {
+  _markProjectAsLoaded.run(projectId);
+};
+
+const _markProjectAsStarted = db.prepare(`UPDATE projects SET last_started_at = strftime('%s', 'now') WHERE project_id=?;`);
+export const markProjectAsStarted = (projectId: string) => {
+  _markProjectAsStarted.run(projectId);
 };

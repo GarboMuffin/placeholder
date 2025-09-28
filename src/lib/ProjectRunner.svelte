@@ -160,7 +160,14 @@
   const pressGreenFlag = () => {
     vm.greenFlag();
     vm.start();
-    isStarted = true;
+
+    if (!isStarted) {
+      isStarted = true;
+
+      fetch(`/api/projects/${projectId}/started`, {
+        method: 'PUT'
+      });
+    }
   };
 
   const pressStopAll = () => {

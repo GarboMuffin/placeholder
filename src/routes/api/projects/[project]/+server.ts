@@ -6,7 +6,9 @@ import { isNaughty } from '$lib/naughty';
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '$lib/config/limits';
 
 export const GET: RequestHandler = async ({params}) => {
-  return new Response(db.getProjectData(params.project));
+  const data = db.getProjectData(params.project);
+  db.markProjectAsLoaded(params.project);
+  return new Response(data);
 };
 
 export const DELETE: RequestHandler = async ({request, params}) => {

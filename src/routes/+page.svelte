@@ -42,13 +42,14 @@
     border-radius: 0.5em;
     background: rgba(255, 0, 0, 0.245);
     border: 1px solid rgba(255, 0, 0, 0.604);
+    font-weight: bold;
   }
 </style>
 
 <section class="header">
   <h1>Welcome to <span class="fancy">{APP_NAME}.</span></h1>
-  <p>Upload a .sb3 file and we'll generate a secure random link that <i>anyone</i> can use to view the project.</p>
-  <p class="warning">This is an experiment. Projects may be deleted randomly. Please <a href="https://github.com/GarboMuffin/placeholder/issues/new">report bugs</a>.</p>
+  <p>Upload a .sb3 file and we'll generate a temporary link that anyone can use to view the project. The links are random, so people can only view the project if you share the link yourself.</p>
+  <p class="warning">In the near future, projects that have not been used for at least 30 days may be automatically deleted.</p>
 </section>
 
 <section class="file">
@@ -60,16 +61,12 @@
   <p>Go to Scratch &gt; Go to My Stuff &gt; Open your project &gt; See inside &gt; Open the "File" in the top left corner &gt; Press "Save to your computer" &gt; Upload the downloaded file to this site.</p>
 
   <h2>What projects am I allowed to upload?</h2>
-  <p>If you follow the <a href="https://scratch.mit.edu/community_guidelines">Scratch community guidelines</a>, then you have nothing to worry about. We will emphasize a few points (noncomprehensive):</p>
-  <ul>
-    <li>No hate speech.</li>
-    <li>No spreading personal information.</li>
-    <li>Nothing that is illegal in the United States of America.</li>
-  </ul>
+  <p>If you follow the spirit of the <a href="https://scratch.mit.edu/community_guidelines">Scratch community guidelines</a>, then you have nothing to worry about.</p>
 
   <h2>How long do the links work for?</h2>
-  <p>During the experiment period, projects may be removed at random. We aren't going out of our way to delete projects, but when we have to make significant database changes, we probably won't write migration code.</p>
-  <p>In the future, we intend to make the links work for as long as reasonably possible. We're not sure what exactly that means right now.</p>
+  <p>If a project has not been used for at least 30 days, it may automatically deleted. We may change this threshold up or down without warning. "Uptime checking" robots and other simple scripts will not reset this timer.</p>
+  <p>Setting aside the 30 day timer, projects may also be deleted without warning if we need to clear space or make significant internal changes.</p>
+  <p>You absolutely must not rely on these links to work long-term. We can not recover deleted projects no matter how important the project is.</p>
 
   <h2>Can I edit or delete the project?</h2>
   <p>The uploader of a project can delete it. Editing the project after uploading may be added later.</p>
@@ -85,13 +82,6 @@
 
   <h2>Do custom extensions work?</h2>
   <p>Most extensions on <a href="https://extensions.turbowarp.org/">extensions.turbowarp.org</a> will work.</p>
-
-  <h2>Notable missing features that will be added eventually</h2>
-  <ul>
-    <li>Built-in editor</li>
-    <li>Addons</li>
-    <li>Editing uploaded projects</li>
-  </ul>
 
   <h2>Where is the source code?</h2>
   <p><a href="https://github.com/GarboMuffin/placeholder/">https://github.com/GarboMuffin/placeholder/</a></p>
