@@ -69,8 +69,6 @@
   <div class="links">
     <a href="/">Home</a>
     <div class="link-gap" />
-    <a href="https://github.com/sponsors/GarboMuffin">Donate</a>
-    <div class="link-gap" />
     <a href="https://github.com/GarboMuffin/placeholder">GitHub</a>
     <div class="link-gap" />
     <a href="/privacy">Privacy</a>
