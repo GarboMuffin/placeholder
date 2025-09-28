@@ -25,7 +25,7 @@
 
     progress = 0;
     progressText = 'Loading libraries';
-    const JSZip = (await import('jszip')).default;
+    const JSZip = (await import('@turbowarp/jszip')).default;
 
     progress = 0.05;
     progressText = 'Extracting project';
