@@ -57,25 +57,25 @@
 </section>
 
 <section class="questions">
-  <h2>How do I get the .sb3 file to upload?</h2>
-  <p>Go to Scratch &gt; Go to My Stuff &gt; Open your project &gt; See inside &gt; Open the "File" in the top left corner &gt; Press "Save to your computer" &gt; Upload the downloaded file to this site.</p>
+  <h2>How do I get an .sb3 file?</h2>
+  <p>Go to Scratch &gt; Go to My Stuff &gt; Open a project &gt; See inside &gt; Open the "File" in the top left corner &gt; Click "Save to your computer" &gt; Select or drop the downloaded file.</p>
 
   <h2>What projects am I allowed to upload?</h2>
-  <p>If you follow the spirit of the <a href="https://scratch.mit.edu/community_guidelines">Scratch community guidelines</a>, then you have nothing to worry about.</p>
+  <p>If you follow the <a href="https://scratch.mit.edu/community_guidelines">Scratch community guidelines</a>, then you have nothing to worry about.</p>
 
   <h2>How long do the links work for?</h2>
-  <p>If a project has not been used for at least 30 days, it may automatically deleted. We may change this threshold up or down without warning. "Uptime checking" robots and other simple scripts will not reset this timer.</p>
-  <p>Setting aside the 30 day timer, projects may also be deleted without warning if we need to clear space or make significant internal changes.</p>
-  <p>You absolutely must not rely on these links to work long-term. We can not recover deleted projects no matter how important the project is.</p>
+  <p>If a project has not been used for 30 days, it may get automatically deleted. We may adjust this time period without warning. "Uptime checking" robots and other simple scripts will not reset this timer.</p>
+  <p>Projects may also be deleted without warning if we need to clear space or make significant internal changes.</p>
+  <p>You must not rely on these links to work long-term. We cannot recover deleted projects no matter how important the project is.</p>
 
-  <h2>Can I edit or delete the project?</h2>
-  <p>The uploader of a project can delete it. Editing the project after uploading may be added later.</p>
+  <h2>Can I edit or delete a project?</h2>
+  <p>You can delete your own projects. We may add project editing later on.</p>
 
   <h2>How do I sign in?</h2>
   <p>There are no accounts. You can only upload projects. We store a secret token in your browser's local storage when you upload a project instead of using accounts.</p>
 
   <h2>How large can projects be?</h2>
-  <p>Similar limits to Scratch. The limits will be adjusted over time.</p>
+  <p>Similar to those on Scratch. The limits will be adjusted over time.</p>
 
   <h2>Do cloud variables work?</h2>
   <p>Yes.</p>
@@ -84,5 +84,5 @@
   <p>Most extensions on <a href="https://extensions.turbowarp.org/">extensions.turbowarp.org</a> will work.</p>
 
   <h2>Where is the source code?</h2>
-  <p><a href="https://github.com/GarboMuffin/placeholder/">https://github.com/GarboMuffin/placeholder/</a></p>
+  <p>The source code is over at <a href="https://github.com/GarboMuffin/placeholder/">https://github.com/GarboMuffin/placeholder/</a></p>
 </section>
