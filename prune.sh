@@ -6,6 +6,7 @@
 set -euxo pipefail
 
 sqlite3 unshared.db "
+PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 
 DELETE
