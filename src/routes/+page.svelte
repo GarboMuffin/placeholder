@@ -49,7 +49,7 @@
 <section class="header">
   <h1>Welcome to <span class="fancy">{APP_NAME}.</span></h1>
   <p>Upload a .sb3 file and we'll generate a temporary link that anyone can use to view the project. The links are random, so people can only view the project if you share the link yourself.</p>
-  <p class="warning">In the near future, projects that have not been used for at least 30 days may be automatically deleted.</p>
+  <p class="warning">Projects that have not been used for at least 30 days will be automatically deleted.</p>
 </section>
 
 <section class="file">
@@ -64,7 +64,7 @@
   <p>If you follow the spirit of the <a href="https://scratch.mit.edu/community_guidelines">Scratch community guidelines</a>, then you have nothing to worry about.</p>
 
   <h2>How long do the links work for?</h2>
-  <p>If a project has not been used for at least 30 days, it may automatically deleted. We may change this threshold up or down without warning. "Uptime checking" robots and other simple scripts will not reset this timer.</p>
+  <p>If a project has not been used for at least 30 days, it will be automatically deleted. We may change this threshold up or down without warning. "Uptime checking" robots and other simple scripts will not reset this timer.</p>
   <p>Setting aside the 30 day timer, projects may also be deleted without warning if we need to clear space or make significant internal changes.</p>
   <p>You absolutely must not rely on these links to work long-term. We can not recover deleted projects no matter how important the project is.</p>
 
