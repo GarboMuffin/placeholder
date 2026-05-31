@@ -103,6 +103,8 @@ BEGIN
     NOT EXISTS (SELECT 1 FROM complete_project_assets WHERE asset_sha256=assets.asset_sha256);
 END;`);
 
+db.exec(`CREATE INDEX IF NOT EXISTS complete_project_assets_by_sha256 ON complete_project_assets(asset_sha256);`);
+
 // TODO: I would not be surprised if this is susceptible to timing attacks
 db.exec(`
 CREATE TABLE IF NOT EXISTS admin_tokens (
