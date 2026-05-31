@@ -123,14 +123,14 @@ CREATE TABLE IF NOT EXISTS admin_project_reports (
 ) STRICT;
 `);
 
-const _getTotalProjectDataSize = db.prepare('SELECT sum(length(data)) FROM projects;');
-const _getTotalCompleteAssetSize = db.prepare('SELECT sum(length(data)) FROM assets;');
-const _getTotalIncompleteAssetSize = db.prepare('SELECT sum(asset_size) FROM incomplete_project_assets;');
+const _getTotalProjectDataSize = db.prepare<unknown[], {'sum(length(data))': number | null}>('SELECT sum(length(data)) FROM projects;');
+const _getTotalCompleteAssetSize = db.prepare<unknown[], {'sum(length(data))': number | null}>('SELECT sum(length(data)) FROM assets;');
+const _getTotalIncompleteAssetSize = db.prepare<unknown[], {'sum(asset_size)': number | null}>('SELECT sum(asset_size) FROM incomplete_project_assets;');
 const getTotalSizeOfEverything = () => {
   return (
-    _getTotalProjectDataSize.get()['sum(length(data))'] +
-    _getTotalCompleteAssetSize.get()['sum(length(data))'] +
-    _getTotalIncompleteAssetSize.get()['sum(asset_size)']
+    (_getTotalProjectDataSize.get()?.['sum(length(data))'] ?? 0) +
+    (_getTotalCompleteAssetSize.get()?.['sum(length(data))'] ?? 0) +
+    (_getTotalIncompleteAssetSize.get()?.['sum(asset_size)'] ?? 0)
   );
 };
 
@@ -241,7 +241,7 @@ const createOwnershipToken = (projectId: string): string => {
   return token;
 };
 
-const _getAnyOwnershipToken = db.prepare(`SELECT ownership_token FROM ownership_tokens WHERE project_id=?;`);
+const _getAnyOwnershipToken = db.prepare<unknown[], {ownership_token: string}>(`SELECT ownership_token FROM ownership_tokens WHERE project_id=?;`);
 export const getAdminOwnershipToken = (projectId: string): string | null => {
   // For now we'll just use the the first token, which is guaranteed to always exist.
   const result = _getAnyOwnershipToken.get(projectId);
@@ -254,7 +254,7 @@ export const getAdminOwnershipToken = (projectId: string): string | null => {
 interface CompleteAssetMetadata {
   size: number;
 }
-const _isCompleteAsset = db.prepare(`
+const _isCompleteAsset = db.prepare<unknown[], {'length(data)': number}>(`
   SELECT length(data) FROM assets WHERE asset_sha256=?;
 `)
 const getCompleteAssetMetadata = (sha256: string): CompleteAssetMetadata | null => {
@@ -286,7 +286,7 @@ interface IncompleteAssetMetadata {
   sha256: string;
   size: number;
 }
-const _getIncompleteAssetMetadata = db.prepare(`
+const _getIncompleteAssetMetadata = db.prepare<unknown[], {asset_sha256: string; asset_size: number}>(`
   SELECT asset_sha256, asset_size FROM incomplete_project_assets WHERE project_id=? AND asset_md5ext=?;
 `)
 const getIncompleteAssetMetadata = (projectId: string, md5ext: string): IncompleteAssetMetadata => {
@@ -361,7 +361,7 @@ interface ProjectMetadata {
   title: string;
   description: string;
 }
-const _getCompleteProjectMetadata = db.prepare(`
+const _getCompleteProjectMetadata = db.prepare<unknown[], {project_title: string; project_description: string}>(`
   SELECT project_title, project_description FROM projects WHERE project_id=? AND complete=TRUE;
 `);
 export const getCompleteProjectMetadata = (projectId: string): ProjectMetadata => {
@@ -375,7 +375,7 @@ export const getCompleteProjectMetadata = (projectId: string): ProjectMetadata =
   };
 };
 
-const _getCompleteAssets = db.prepare(`
+const _getCompleteAssets = db.prepare<unknown[], {asset_sha256: string; asset_md5ext: string}>(`
   SELECT asset_sha256, asset_md5ext FROM complete_project_assets WHERE project_id=?;
 `)
 export const getMd5extToSha256 = (projectId: string): Record<string, string> => {
@@ -388,16 +388,19 @@ export const getMd5extToSha256 = (projectId: string): Record<string, string> => 
 };
 
 const _doesProjectExist = db.prepare('SELECT 1 FROM projects WHERE project_id=? AND complete=TRUE;');
-const _getProjectData = db.prepare('SELECT data FROM projects WHERE project_id=?;');
+const _getProjectData = db.prepare<unknown[], {data: Buffer}>('SELECT data FROM projects WHERE project_id=?;');
 export const getProjectData = (projectId: string): Buffer => {
   if (!_doesProjectExist.get(projectId)) {
     throw error(404, 'project does not exist');
   }
   const project = _getProjectData.get(projectId);
+  if (!project) {
+    throw error(404, 'project does not exist');
+  }
   return project.data;
 };
 
-const _getAssetData = db.prepare('SELECT data FROM assets WHERE asset_sha256=?;');
+const _getAssetData = db.prepare<unknown[], {data: Buffer}>('SELECT data FROM assets WHERE asset_sha256=?;');
 export const getAssetData = (sha256: string): Buffer => {
   const asset = _getAssetData.get(sha256);
   if (!asset) {
@@ -443,7 +446,13 @@ export const deleteReport = (reportId: number): void => {
   _deleteReport.run(reportId);
 };
 
-const _getAllReports = db.prepare(`
+const _getAllReports = db.prepare<unknown[], {
+  report_id: number;
+  project_id: string;
+  report_body: string;
+  project_title: string;
+  project_description: string;
+}>(`
   SELECT
     report_id,
     project_id,

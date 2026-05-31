@@ -5,8 +5,6 @@
 
   export let data: PageData;
 
-  // I don't know why sveltekit isn't doing the types properly
-  // @ts-expect-error
   const reports: Report[] = data.reports;
 
   let dismissedReports: number[] = [];
