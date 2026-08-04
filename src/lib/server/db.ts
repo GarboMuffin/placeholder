@@ -198,8 +198,12 @@ export const createIncompleteProject = db.transaction((
   for (const md5ext of parsedProject.md5exts) {
     const asset = assetInformation[md5ext];
 
-    if (asset.size > Limits.MAX_ASSET_SIZE) {
-      throw error(400, `asset is too large: ${md5ext}`);
+    if (
+      !Number.isSafeInteger(asset.size) ||
+      asset.size < 0 ||
+      asset.size > Limits.MAX_ASSET_SIZE
+    ) {
+      throw error(400, `invalid asset size: ${md5ext}`);
     }
 
     const completeAsset = getCompleteAssetMetadata(asset.sha256);
